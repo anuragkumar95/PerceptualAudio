@@ -1,6 +1,7 @@
 import numpy as np
-import tensorflow as tf
-import tensorflow.contrib.slim as slim
+import torch.nn.functional as F
+#import tensorflow as tf
+#import tensorflow.contrib.slim as slim
 from sklearn.preprocessing import normalize
 
 # LEAKY RELU UNIT
@@ -9,27 +10,49 @@ def lrelu(x):
 
 
 # GENERATE DILATED LAYER FROM 1D SIGNAL
+"""
 def signal_to_dilated(signal, dilation, n_channels):
     shape = tf.shape(signal)
     pad_elements = dilation - 1 - (shape[2] + dilation - 1) % dilation
     dilated = tf.pad(signal, [[0, 0], [0, 0], [0, pad_elements], [0, 0]])
     dilated = tf.reshape(dilated, [shape[0],-1,dilation,n_channels])
     return tf.transpose(dilated, perm=[0,2,1,3]), pad_elements
-
+"""
+def signal_to_dilated_torch(signal, dilation, n_channels):
+    shape = signal.shape
+    pad_elements = dilation - 1 - (shape[2] + dilation - 1) % dilation
+    dilated = F.pad(signal, (0, 0, 0, 0, 0, pad_elements, 0, 0))
+    dilated = dilated.reshape(shape[0], -1, dilation, n_channels)
+    return dilated.permute(0, 2, 1, 3), pad_elements
 
 # COLLAPSE DILATED LAYER TO 1D SIGNAL
+"""
 def dilated_to_signal(dilated, pad_elements, n_channels):
     shape = tf.shape(dilated)
     signal = tf.transpose(dilated, perm=[0,2,1,3])
     signal = tf.reshape(signal, [shape[0],1,-1,n_channels])
     return signal[:,:,:shape[1]*shape[2]-pad_elements,:]
+"""
+def dilated_to_signal_torch(dilated, pad_elements, n_channels):
+    shape = dilated.shape
+    signal = dilated.permute(0, 2, 1, 3)
+    signal = tf.reshape(signal, [shape[0],1,-1,n_channels])
+    signal = signal.reshape(shape[0], 1, -1, n_channels)
+    return signal[ :, :, :shape[1] * shape[2] - pad_elements, :]
 
 
 # ADAPTIVE BATCH NORMALIZATION LAYER
+"""
 def nm(x):
     w0=tf.Variable(1.0,name='w0')
     w1=tf.Variable(0.0,name='w1')
     return w0*x+w1*slim.batch_norm(x)
+"""
+
+def nm_torch(x):
+  w0 = torch.tensor(1.0)
+  w1 = torch.tensor(0.0)
+  return (w0 * x) + (w1 * F.batch_norm(x))
 
 
 # IDENTITY INITIALIZATION OF CONV LAYERS
@@ -42,10 +65,8 @@ def identity_initializer():
         return tf.constant(array, dtype=dtype)
     return _initializer
 
-def l1_loss_batch(target):
-    return tf.reduce_mean(tf.abs(target),axis=[1,2,3])
-
 # L1 LOSS FUNCTION
+"""
 def l1_loss(target,current):
     return tf.reduce_mean(tf.abs(target-current))
 
@@ -57,11 +78,21 @@ def l2_loss_all(agg):
 
 def l1_loss_batch(target):
     return tf.reduce_mean(tf.abs(target),axis=[1,2,3])
+"""
+def l1_loss_all_torch(agg):
+    return torch.mean(torch.abs(agg))
 
-def l1_loss_batch(target):
-    return tf.reduce_mean(tf.abs(target),axis=[1,2,3])
+def l1_loss_torch(target,current):
+    return torch.mean(torch.abs(target-current))
+
+def l2_loss_all_torch(agg):
+    return torch.mean(agg**2)
+
+def l1_loss_batch_torch(target):
+    return torch.mean(torch.abs(target), dim=[1,2,3])
 
 # L2 LOSS FUNCTION
+"""
 def l2_loss(target,current):
     return tf.reduce_mean(tf.square(target-current))
 
@@ -69,6 +100,19 @@ def l2_loss_unit(target,current):
     target=tf.linalg.l2_normalize(target,axis=3)
     current = tf.linalg.l2_normalize(current,axis=3)
     return tf.reduce_mean(tf.square(target-current))
+"""
+
+def l2_loss_torch(target,current):
+    return torch.mean((target-current)**2)
+
+def l2_loss_unit_torch(target,current):
+    target = target/torch.norm(x, p=2, dim=3, keepdim=True)
+    target[torch.isnan(target)] = 0 # to avoid nan
+
+    current = current/torch.norm(x, p=2, dim=3, keepdim=True)
+    current[torch.isnan(current)] = 0 # to avoid nan
+    
+    return torch.mean((target-current)**2)
 
 def frame(data, window_length, hop_length):
   """Convert array into a sequence of successive possibly overlapping frames.
