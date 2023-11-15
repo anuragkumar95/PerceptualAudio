@@ -1,4 +1,5 @@
 import numpy as np
+import torch.nn as nn
 import torch.nn.functional as F
 #import tensorflow as tf
 #import tensorflow.contrib.slim as slim
@@ -49,10 +50,14 @@ def nm(x):
     return w0*x+w1*slim.batch_norm(x)
 """
 
-def nm_torch(x):
-  w0 = torch.tensor(1.0)
-  w1 = torch.tensor(0.0)
-  return (w0 * x) + (w1 * F.batch_norm(x))
+class nm_torch(nn.Module):
+    def __init__(self,):
+        super().__init__()
+        self.w0 = torch.tensor(1.0, requires_grad=True)
+        self.w1 = torch.tensor(0.0, requires_grad=True)
+
+    def forward(self, x):
+        return (self.w0 * x) + (self.w1 * F.batch_norm(x))
 
 
 # IDENTITY INITIALIZATION OF CONV LAYERS

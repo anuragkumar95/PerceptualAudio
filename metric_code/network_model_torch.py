@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy 
-rom helper import *
+from helper import *
 
 class LossNet(nn.Module):
     def __init__(self, in_channels, n_layers, kernel_size, keep_prob, norm_type='sbn'):
@@ -12,6 +12,7 @@ class LossNet(nn.Module):
             #Increase output channels every 5 layers
             out_channels = 32 * (2 ** (i // 5))
             prev_out = 32 * (2 ** ((i-1) // 5))
+            layers = nn.ModuleList()
             if i == 0:
                 layer = nn.Conv2d(in_channels, 
                                   out_channels, 
@@ -31,20 +32,30 @@ class LossNet(nn.Module):
                                   stride=(1, 2),
                                   padding='same')
             
-            self.net.append(layer)
+            layers.append(layer)
+
             if norm_type == 'sbn':
                 batch_norm = torch.nn.BatchNorm2d(out_channels)
-                self.net.append(batch_norm)
+            elif norm_type == 'nm':
+                batch_norm = nm_torch()
+            elif norm_type == 'none':
+                batch_norm is None
             else:
                 raise NotImplementedError
+            if batch_norm is not None:
+                layers.append(batch_norm)
+
             if i < n_layers - 1:
                 dropout = nn.Dropout(1 - keep_prob)
-                self.net.append(dropout)
+                layers.append(dropout)
+
+            self.net.append(layers)
         
     def forward(self, x):
         outs = []
         for layer in self.net:
-            x = layer(x)
+            for sub_layer in layer:
+                x = sub_layer(x)
             outs.append(x)
         return outs
 
@@ -73,13 +84,6 @@ class FeatureLossBatch(nn.Module):
         """
         Both embeds1 and embeeds are outputs from each layer of
         loss_net. 
-        a=feat_current[id]-feat_target[id]
-        weights = tf.Variable(tf.random_normal([channels[id]]),
-                      name="weights_%d" %id, trainable=True)
-        a1=tf.transpose(a, [0, 1, 3, 2])
-        result=tf.multiply(a1, weights[:,tf.newaxis])
-        loss_result=l1_loss_batch(result)
-        loss_vec.append(loss_result) 
         """
         loss_vec = []
         for e1, e2 in zip(embeds1, embeds2):
@@ -92,9 +96,35 @@ class FeatureLossBatch(nn.Module):
 
 
 class JNDModel(nn.Module):
-    def __init__(self, ):
+    def __init__(self, in_channels, n_layers, keep_prob, norm_type='sbn'):
         super().__init__()
-        self.loss_net = LossNet
+        self.loss_net = LossNet(in_channels=in_channels, 
+                                n_layers=n_layers, 
+                                kernel_size=3, 
+                                keep_prob=keep_prob, 
+                                norm_type=norm_type)
+
+        self.classification_layer = ClassificationHead()
+
+        self.feature_loss = FeatureLossBatch(n_layers=n_layers,
+                                             base_channels=32)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, inp, ref):
+        ref = self.loss_net(ref)
+        inp = self.loss_net(inp)
+
+        others, loss_sum = self.feature_loss(ref, inp)
+        dist = self.sigmoid(torch.mean(others, dim=0)).reshape(-1, 1, 1)
+
+        logits = self.classification_layer(dist)
+        return logits
+
+
+
+
+        
+
 
 
 
