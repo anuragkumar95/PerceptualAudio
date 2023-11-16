@@ -43,6 +43,7 @@ class JNDDataset(Dataset):
                 out = os.path.join(self.data_root, out)
                 paths['input'].append(inp)
                 paths['output'].append(out)
+                print(f"Label:{label}")
                 paths['labels'].append(int(label))
 
         with open(os.path.join(root, 'dataset_linear.txt'), 'r') as f:
