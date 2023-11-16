@@ -110,8 +110,8 @@ class JNDTrainer:
         labels = F.one_hot(labels, 2).long()
 
         logits = self.model(inp=wav_in, ref=wav_out)
-        #loss = F.cross_entropy(logits, labels).mean()
-        loss = F.binary_cross_entropy_with_logits(logits, labels) 
+        loss = F.cross_entropy(logits, labels).mean()
+        #loss = F.binary_cross_entropy_with_logits(logits, labels) 
 
         self.optimizer.zero_grad()
         loss.backward()
