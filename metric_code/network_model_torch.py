@@ -12,37 +12,6 @@ class LossNet(nn.Module):
     def __init__(self, in_channels, n_layers, kernel_size, keep_prob, norm_type='sbn'):
         super().__init__()
         self.net = nn.ModuleList()
-        """
-        self.layers = nn.Sequential(
-            nn.utils.spectral_norm(
-                nn.Conv2d(in_channel, ndf, (4, 4), (2, 2), (1, 1), bias=False)
-            ),
-            nn.InstanceNorm2d(ndf, affine=True),
-            nn.PReLU(ndf),
-            nn.utils.spectral_norm(
-                nn.Conv2d(ndf, ndf * 2, (4, 4), (2, 2), (1, 1), bias=False)
-            ),
-            nn.InstanceNorm2d(ndf * 2, affine=True),
-            nn.PReLU(2 * ndf),
-            nn.utils.spectral_norm(
-                nn.Conv2d(ndf * 2, ndf * 4, (4, 4), (2, 2), (1, 1), bias=False)
-            ),
-            nn.InstanceNorm2d(ndf * 4, affine=True),
-            nn.PReLU(4 * ndf),
-            nn.utils.spectral_norm(
-                nn.Conv2d(ndf * 4, ndf * 8, (4, 4), (2, 2), (1, 1), bias=False)
-            ),
-            nn.InstanceNorm2d(ndf * 8, affine=True),
-            nn.PReLU(8 * ndf),
-            nn.AdaptiveMaxPool2d(1),
-            nn.Flatten(),
-            nn.utils.spectral_norm(nn.Linear(ndf * 8, ndf * 4)),
-            nn.Dropout(0.3),
-            nn.PReLU(4 * ndf),
-            nn.utils.spectral_norm(nn.Linear(ndf * 4, 1)),
-            LearnableSigmoid(1),
-        )
-        """
         for i in range(n_layers):
             out_channels = 32 * (2 ** (i // 5))
             prev_out = 32 * (2 ** ((i-1) // 5))
@@ -136,7 +105,7 @@ class LossNet(nn.Module):
     def forward(self, x):
         outs = []
         for layer in self.net:
-            x = sub_layer(x)
+            x = layer(x)
             outs.append(x)
         return outs
 
