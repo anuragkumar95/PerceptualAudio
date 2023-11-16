@@ -79,10 +79,12 @@ class ClassificationHead(nn.Module):
 
                 
 class FeatureLossBatch(nn.Module):
-    def __init__(self, n_layers, base_channels):
+    def __init__(self, n_layers, base_channels, gpu_id=None):
         super().__init__()
         self.out_channels = [base_channels * (2 ** (i // 5)) for i in range(n_layers)]
         self.weights = [nn.Parameter(torch.randn(features, 1), requires_grad=True) for features in self.out_channels]
+        if gpu id is not None:
+            self.weights = self.weights.to(gpu_id)
 
     def forward(self, embeds1, embeds2):
         """
@@ -100,7 +102,7 @@ class FeatureLossBatch(nn.Module):
 
 
 class JNDModel(nn.Module):
-    def __init__(self, in_channels, n_layers, keep_prob, norm_type='sbn'):
+    def __init__(self, in_channels, n_layers, keep_prob, norm_type='sbn', gpu_id=None):
         super().__init__()
         self.loss_net = LossNet(in_channels=in_channels, 
                                 n_layers=n_layers, 
@@ -111,7 +113,8 @@ class JNDModel(nn.Module):
         self.classification_layer = ClassificationHead(in_dim=1, out_dim=2)
 
         self.feature_loss = FeatureLossBatch(n_layers=n_layers,
-                                             base_channels=32)
+                                             base_channels=32,
+                                             gpu_id=gpu_id)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inp, ref):

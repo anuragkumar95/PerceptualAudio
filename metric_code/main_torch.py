@@ -65,7 +65,8 @@ class JNDTrainer:
         self.model = JNDModel(in_channels, 
                               n_layers, 
                               keep_prob, 
-                              norm_type)
+                              norm_type,
+                              gpu_id)
 
         self.optimizer = torch.optim.AdamW(filter(lambda layer:layer.requires_grad,self.model.parameters()), 
                                            lr=args.learning_rate)
