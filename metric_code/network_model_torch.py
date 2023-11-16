@@ -64,11 +64,11 @@ class LossNet(nn.Module):
         return outs
 
 class ClassificationHead(nn.Module):
-    def __init__(self):
+    def __init__(self, in_dim, out_dim):
         super().__init__()
-        self.dense3 = nn.Linear(1, 16)
+        self.dense3 = nn.Linear(in_dim, 16)
         self.dense4 = nn.Linear(16, 6)
-        self.dense2 = nn.Linear(6, 2)
+        self.dense2 = nn.Linear(6, out_dim)
         self.relu = nn.ReLU()
 
     def forward(self, x):
@@ -108,7 +108,7 @@ class JNDModel(nn.Module):
                                 keep_prob=keep_prob, 
                                 norm_type=norm_type)
 
-        self.classification_layer = ClassificationHead()
+        self.classification_layer = ClassificationHead(in_dim=1, out_dim=2)
 
         self.feature_loss = FeatureLossBatch(n_layers=n_layers,
                                              base_channels=32)

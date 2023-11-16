@@ -68,7 +68,7 @@ class JNDDataset(Dataset):
 
     def __len__(self):
         return len(self.paths['input'])
-
+ 
     def __getitem__(self, idx):
         inp_file = self.paths['input'][idx]
         out_file = self.paths['output'][idx]

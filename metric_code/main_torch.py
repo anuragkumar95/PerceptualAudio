@@ -115,7 +115,7 @@ class JNDTrainer:
         return loss 
 
     
-    def train_one_epoch(self):
+    def train_one_epoch(self, epoch):
         epoch_loss = 0
         num_batches = len(self.train_ds)
         for i, batch in enumerate(self.train_ds):
@@ -124,6 +124,7 @@ class JNDTrainer:
                 'step':i+1,
                 'loss':batch_loss
             })
+            print(f"EPOCH:{epoch+1} | STEP:{i+1} | LOSS:{batch_loss}")
             epoch_loss += batch_loss
         epoch_loss = epoch_loss / num_batches
         return epoch_loss
@@ -146,11 +147,11 @@ class JNDTrainer:
         val_loss = val_loss / num_batches
         return val_loss
 
-    def train(self, epochs, train_ds, val_ds):
+    def train(self, epochs):
         best_val = 999999999
         for epoch in range(epochs):
             self.model.train()
-            ep_loss = self.train_one_epoch()
+            ep_loss = self.train_one_epoch(epoch)
             
             self.model.eval()
             val_loss = self.run_validation()
@@ -216,6 +217,8 @@ def main(rank, world_size, args):
                          keep_prob=keep_prob_drop, 
                          norm_type=args.loss_norm,
                          gpu_id=rank)
+
+    trainer.train(epochs=args.epochs)
     
 
 if __name__=='__main__':
