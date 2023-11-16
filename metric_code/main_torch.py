@@ -68,6 +68,7 @@ class JNDTrainer:
                               norm_type,
                               gpu_id)
 
+
         self.optimizer = torch.optim.AdamW(filter(lambda layer:layer.requires_grad,self.model.parameters()), 
                                            lr=args.learning_rate)
 
@@ -108,7 +109,8 @@ class JNDTrainer:
         #labels = F.one_hot(labels, 2)
 
         logits = self.model(inp=wav_in, ref=wav_out)
-        loss = F.cross_entropy(logits, labels).mean()
+        #loss = F.cross_entropy(logits, labels).mean()
+        loss = F.binary_cross_entropy_with_logits(logits, labels).mean()
 
         self.optimizer.zero_grad()
         loss.backward()
