@@ -112,7 +112,7 @@ def collate_fn(batch):
     new_inp = new_inp.unsqueeze(1).unsqueeze(-1)
     new_out = new_out.unsqueeze(1).unsqueeze(-1)
     labels = torch.stack([sample[-1] for sample in batch])
-    print(f"Collate: inp:{new_inp.shape}, out:{new_out.shape}, labels:{labels.shape}")
+    
     return new_inp, new_out, labels
 
 
