@@ -99,6 +99,9 @@ def collate_fn(batch):
     max_len = 0
     for sample in batch:
         max_len = max(max_len, sample[0].shape[-1])
+
+    for sample in batch:
+        print(sample[-1])
     
     final_dims = (len(batch), max_len)
     new_inp = sample[0].data.new(*final_dims).fill_(0)
