@@ -141,7 +141,7 @@ class FeatureLossBatch(nn.Module):
         for i, (e1, e2) in enumerate(zip(embeds1, embeds2)):
             dist = e1 - e2
             dist = dist.permute(0, 1, 3, 2)
-            if self.weights is None:
+            if self.weights is not None:
                 res = self.weights[i] * dist
             else:
                 res = dist
