@@ -79,12 +79,15 @@ class ClassificationHead(nn.Module):
 
                 
 class FeatureLossBatch(nn.Module):
-    def __init__(self, n_layers, base_channels, gpu_id=None):
+    def __init__(self, n_layers, base_channels, weights=False, gpu_id=None):
         super().__init__()
         self.out_channels = [base_channels * (2 ** (i // 5)) for i in range(n_layers)]
-        self.weights = [nn.Parameter(torch.randn(features, 1), requires_grad=True) for features in self.out_channels]
-        if gpu_id is not None:
-            self.weights = [param.to(gpu_id) for param in self.weights]
+        if weights:
+            self.weights = [nn.Parameter(torch.randn(features, 1), requires_grad=True) for features in self.out_channels]
+            if gpu_id is not None:
+                self.weights = [param.to(gpu_id) for param in self.weights]
+        else:
+            self.weights = None
 
     def forward(self, embeds1, embeds2):
         """
@@ -95,7 +98,10 @@ class FeatureLossBatch(nn.Module):
         for i, (e1, e2) in enumerate(zip(embeds1, embeds2)):
             dist = e1 - e2
             dist = dist.permute(0, 1, 3, 2)
-            res = self.weights[i] * dist
+            if self.weights is None:
+                res = self.weights[i] * dist
+            else:
+                res = dist
             loss = l1_loss_batch_torch(res)
             loss_vec.append(loss)
         return loss_vec, loss_vec
