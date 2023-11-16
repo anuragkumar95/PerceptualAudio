@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy 
 
-from torch.utils.data import Dataset, Dataloader
+from torch.utils.data import Dataset, DataLoader
 import torchaudio
 import torchaudio.functional as F
 import os
@@ -112,7 +112,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=None
     test_ds = JNDDataset(root, path_root, test_indices, resample=resample)
 
     if parallel:
-        train_dataset = torch.utils.data.DataLoader(
+        train_dataset = DataLoader(
             dataset=train_ds,
             batch_size=batch_size,
             pin_memory=True,
@@ -121,7 +121,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=None
             drop_last=True,
             num_workers=n_cpu,
         )
-        test_dataset = torch.utils.data.DataLoader(
+        test_dataset = DataLoader(
             dataset=test_ds,
             batch_size=batch_size,
             pin_memory=True,
