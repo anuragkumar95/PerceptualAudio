@@ -83,17 +83,17 @@ class JNDDataset(Dataset):
             out = F.resample(out, orig_freq=o_sr, new_freq=self.resample)
         
         print(f"After resample: inp:{inp.shape}, out:{out.shape}")
-        inp = inp.squeeze()
-        out = out.squeeze()
+        #inp = inp.squeeze()
+        #out = out.squeeze()
 
-        print(f"After squeeze: inp:{inp.shape}, out:{out.shape}")
+        #print(f"After squeeze: inp:{inp.shape}, out:{out.shape}")
 
         #Pad signals so that they have equal length
-        pad = torch.zeros(abs(inp.shape[0] - out.shape[0]))
-        if inp.shape[0] > out.shape[0]:
-            out = torch.cat([pad, out], dim=0)
-        if out.shape[0] > inp.shape[0]:
-            inp = torch.cat([pad, inp], dim=0)
+        pad = torch.zeros(abs(inp.shape[-1] - out.shape[-1]))
+        if inp.shape[-1] > out.shape[-1]:
+            out = torch.cat([pad, out], dim=1)
+        if out.shape[-1] > inp.shape[-1]:
+            inp = torch.cat([pad, inp], dim=1)
 
         print(f"After pad: inp:{inp.shape}, out:{out.shape}")
 
