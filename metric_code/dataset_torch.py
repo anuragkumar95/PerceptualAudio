@@ -76,17 +76,10 @@ class JNDDataset(Dataset):
 
         inp, i_sr = torchaudio.load(inp_file)
         out, o_sr = torchaudio.load(out_file)
-        print(f"Before resample: inp:{inp.shape}, out:{out.shape}")
 
         if self.resample:
             inp = F.resample(inp, orig_freq=i_sr, new_freq=self.resample)
             out = F.resample(out, orig_freq=o_sr, new_freq=self.resample)
-        
-        print(f"After resample: inp:{inp.shape}, out:{out.shape}")
-        #inp = inp.squeeze()
-        #out = out.squeeze()
-
-        #print(f"After squeeze: inp:{inp.shape}, out:{out.shape}")
 
         #Pad signals so that they have equal length
         pad = torch.zeros(abs(inp.shape[-1] - out.shape[-1]))
@@ -95,11 +88,28 @@ class JNDDataset(Dataset):
         if out.shape[-1] > inp.shape[-1]:
             inp = torch.cat([pad, inp], dim=1)
 
-        print(f"After pad: inp:{inp.shape}, out:{out.shape}")
-
         label = torch.LongTensor(self.paths['labels'][idx])
-        print(f"label:{label.shape}, inp:{inp.shape}, out:{out.shape}")
         return inp, out, label
+
+def collate_fn(batch):
+    """
+    Batch is a list of samples of len batch_size.
+    Each sample is a tuple <inp_wav, out_wav, label>
+    """
+    max_len = 0
+    for sample in batch:
+        max_len = max(max_len, sample[0].shape[-1])
+    
+    final_dims = (len(batch), max_len)
+    new_inp = sample[0].data.new(*final_dims).fill_(0)
+    new_out = sample[1].data.new(*final_dims).fill_(0)   
+    for i, sample in enumerate(batch):
+        new_inp[i, :sample[0].shape[-1]] = sample[0][0]
+        new_out[i, :sample[1].shape[-1]] = sample[0][1]
+    labels = torch.stack([sample[-1] for sample in batch])
+    print(f"Collate: inp:{new_inp.shape}, out:{new_out.shape}, labels:{labels.shape}")
+    return new_inp, new_out, labels
+
 
     
 def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=False, parallel=False):
@@ -129,6 +139,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
             sampler=DistributedSampler(train_ds),
             drop_last=True,
             num_workers=n_cpu,
+            collate_fn=collate_fn,
         )
         test_dataset = DataLoader(
             dataset=test_ds,
@@ -138,6 +149,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
             sampler=DistributedSampler(test_ds),
             drop_last=True,
             num_workers=n_cpu,
+            collate_fn=collate_fn,
         )
     else:
         train_dataset = DataLoader(
@@ -147,6 +159,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
             shuffle=True,
             drop_last=False,
             num_workers=n_cpu,
+            collate_fn=collate_fn,
         )
         test_dataset = DataLoader(
             dataset=test_ds,
@@ -155,6 +168,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
             shuffle=True,
             drop_last=False,
             num_workers=n_cpu,
+            collate_fn=collate_fn,
         )
 
     return train_dataset, test_dataset
