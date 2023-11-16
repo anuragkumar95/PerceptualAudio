@@ -83,7 +83,7 @@ class FeatureLossBatch(nn.Module):
         super().__init__()
         self.out_channels = [base_channels * (2 ** (i // 5)) for i in range(n_layers)]
         self.weights = [nn.Parameter(torch.randn(features, 1), requires_grad=True) for features in self.out_channels]
-        if gpu id is not None:
+        if gpu_id is not None:
             self.weights = self.weights.to(gpu_id)
 
     def forward(self, embeds1, embeds2):
