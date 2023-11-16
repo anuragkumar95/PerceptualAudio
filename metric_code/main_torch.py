@@ -110,6 +110,7 @@ class JNDTrainer:
         #labels = F.one_hot(labels, 2)
 
         logits = self.model(inp=wav_in, ref=wav_out)
+        print(f"logits:{logits.shape}, labels:{labels.shape}")
         loss = self.criterion(logits, labels)
         #loss = F.binary_cross_entropy_with_logits(logits, labels) 
 
