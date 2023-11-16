@@ -16,10 +16,10 @@ import numpy as np
 class JNDDataset(Dataset):
     def __init__(self, root, path_root, indices, resample=None):
         self.data_root = root
-        self.paths = self.collect_paths(path_root)
-        self.resample = resample
         self.indices = indices
-
+        self.resample = resample
+        self.paths = self.collect_paths(path_root)
+        
     def collect_paths(self, root):
         paths = {'input' : [],
                  'output': [],
