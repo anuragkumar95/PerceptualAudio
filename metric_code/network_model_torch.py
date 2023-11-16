@@ -126,7 +126,7 @@ class JNDModel(nn.Module):
         #print(f"others:{others.shape}")
         dist = self.sigmoid(others.mean()).reshape(-1, 1, 1)
 
-        logits = self.classification_layer(dist)
+        logits = self.classification_layer(dist).squeeze(1)
         return logits
 
 
