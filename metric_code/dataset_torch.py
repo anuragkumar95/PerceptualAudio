@@ -85,7 +85,7 @@ class JNDDataset(Dataset):
         out = out.squeeze()
 
         #Pad signals so that they have equal length
-        pad = torch.zeros(torch.abs(inp.shape[0] - out.shape[0]))
+        pad = torch.zeros(abs(inp.shape[0] - out.shape[0]))
         if inp.shape[0] > out.shape[0]:
             out = torch.cat([pad, out], dim=0)
         if out.shape[0] > inp.shape[0]:
