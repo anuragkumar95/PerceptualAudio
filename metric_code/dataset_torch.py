@@ -49,8 +49,8 @@ class JNDDataset(Dataset):
             lines = f.readlines()
             for idx in self.indices['linear']:
                 inp, out, label, noise = lines[idx].strip().split('\t')
-                inp = os.path.join(self.data_root, f"{noise}_list", inp)
-                out = os.path.join(self.data_root, f"{noise}_list", out)
+                inp = os.path.join(self.data_root, f"{noise.strip()}_list", inp)
+                out = os.path.join(self.data_root, f"{noise.strip()}_list", out)
                 paths['input'].append(inp)
                 paths['output'].append(out)
                 paths['labels'].append(int(label))
