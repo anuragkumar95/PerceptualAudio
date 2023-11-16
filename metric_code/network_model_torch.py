@@ -18,9 +18,8 @@ class LossNet(nn.Module):
             if i == 0:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
-                        F.batch_norm(
-                            nn.Conv2d(in_channels, out_channels, (1, kernel_size), (1, 2), padding=1)
-                        ),
+                        nn.Conv2d(in_channels, out_channels, (1, kernel_size), (1, 2), padding=1),
+                        nn.BatchNorm2d(out_channels),
                         nn.Dropout(1 - keep_prob),
                     )
                 if norm_type == 'nm':
@@ -32,21 +31,19 @@ class LossNet(nn.Module):
             elif i == n_layers - 1:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
-                        F.batch_norm(
-                            nn.Conv2d(in_channels, out_channels, (1, kernel_size), (1, 2), padding=1)
-                        )
+                        nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2), padding=1),
+                        nn.BatchNorm2d(out_channels),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
-                        nn.Conv2d(in_channels, out_channels, (1, kernel_size), (1, 2), padding=1),
+                        nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2), padding=1),
                         nm_torch()
                     )
             else:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
-                        F.batch_norm(
-                            nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2), padding=1)
-                        ),
+                        nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2), padding=1),
+                        nn.BatchNorm2d(out_channels),
                         nn.Dropout(1 - keep_prob),
                     )
                 if norm_type == 'nm':
