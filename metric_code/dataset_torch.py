@@ -104,10 +104,10 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=None
     for key in train_indices:
         with open(os.path.join(path_root, f'dataset_{key}.txt'), 'r') as f:
             num_lines = len(f.readlines())
-            train_indices = list(np.random.choice(num_lines, int(split_ratio * num_lines), replace=False))
-            test_indices = [i for i in range(num_lines) if i not in train_indices]
-        train_indices[key] = train_indices
-        test_indices[key] = test_indices
+            train_indxs = list(np.random.choice(num_lines, int(split_ratio * num_lines), replace=False))
+            test_indxs = [i for i in range(num_lines) if i not in train_indices]
+        train_indices[key] = train_indxs
+        test_indices[key] = test_indxs
 
     train_ds = JNDDataset(root, path_root, train_indices, resample=resample)
     test_ds = JNDDataset(root, path_root, test_indices, resample=resample)
