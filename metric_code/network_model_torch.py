@@ -90,7 +90,7 @@ class FeatureLossBatch(nn.Module):
         loss_net. 
         """
         loss_vec = []
-        for e1, e2 in zip(embeds1, embeds2):
+        for i, e1, e2 in enumerate(zip(embeds1, embeds2)):
             dist = e1 - e2
             dist = dist.permute(0, 1, 3, 2)
             res = self.weights[i] * dist

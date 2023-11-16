@@ -89,8 +89,6 @@ class JNDDataset(Dataset):
         if out.shape[-1] > inp.shape[-1]:
             inp = torch.cat([pad, inp], dim=1)
 
-        print(f"label:{self.paths['labels'][idx]}")
-
         label = torch.tensor(self.paths['labels'][idx])
         return inp, out, label
 
