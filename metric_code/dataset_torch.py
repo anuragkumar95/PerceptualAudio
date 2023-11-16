@@ -4,7 +4,7 @@
 """
 import torch
 import torch.nn as nn
-i#mport torch.nn.functional as F
+import torch.nn.functional as F
 import numpy 
 
 from torch.utils.data import Dataset, Dataloader
