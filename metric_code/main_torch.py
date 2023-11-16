@@ -2,7 +2,7 @@
 """
 @author: Anurag Kumar
 """
-
+import os
 import torch
 import argparse
 import wandb
@@ -12,6 +12,10 @@ from network_model_torch import JNDModel
 
 from dataset_torch import load_data
 
+import torch.multiprocessing as mp
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.distributed import init_process_group, destroy_process_group
+
 wandb.login()
 
 def argument_parser():
@@ -20,8 +24,9 @@ def argument_parser():
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-r', '--root', required=True, help='root dir where the wavs are stored')
-    parser.add_Argument('-o', '--output', required=True, help='path to store saved checkpoints.')
-    parser.add_Argument('--paths', help='path to the dir containing list of paths and labels.')
+    parser.add_argument('-o', '--output', required=True, help='path to store saved checkpoints.')
+    parser.add_argument('--exp', help='name of the experiment')
+    parser.add_argument('--paths', help='path to the dir containing list of paths and labels.')
     parser.add_argument('--layers', help='number of layers in the model', default=14, type=int)
     parser.add_argument('--learning_rate', help='learning rate', default=1e-4, type=float)
     parser.add_argument('--summary_folder', help='summary folder name', default='m_example')
@@ -37,7 +42,8 @@ def argument_parser():
     parser.add_argument('--batch_size', help='batch_size', default=16,type=int)
     parser.add_argument('--dummy_test', help='batch_size', default=0,type=int)
     parser.add_argument('--resample16k', help='resample to 16kHz', default=1,type=int)
-
+    parser.add_argument('--gpu', help='set this flag for single gpu training', action='store_true')
+    parser.add_argument('--parallel', help='set this flag for parallel gpu training', action='store_true')
     
     return parser
 
@@ -53,7 +59,8 @@ class JNDTrainer:
                  in_channels, 
                  n_layers, 
                  keep_prob, 
-                 norm_type='sbn'):
+                 norm_type='sbn',
+                 gpu_id=None):
 
         self.model = JNDModel(in_channels, 
                               n_layers, 
@@ -63,6 +70,13 @@ class JNDTrainer:
         self.optimizer = torch.optim.AdamW(filter(lambda layer:layer.requires_grad,self.model.parameters()), 
                                            lr=args.learning_rate)
 
+        if gpu_id is not None:
+            self.model = self.model.to(gpu_id)
+            
+            if args.parallel:
+                self.model = DDP(self.model, device_ids=[gpu_id])
+                
+        self.gpu_id = gpu_id
         self.train_ds = train_dataloader
         self.val_ds = val_dataloader
         self.args = args
@@ -135,8 +149,12 @@ class JNDTrainer:
     def train(self, epochs, train_ds, val_ds):
         best_val = 999999999
         for epoch in range(epochs):
+            self.model.train()
             ep_loss = self.train_one_epoch()
+            
+            self.model.eval()
             val_loss = self.run_validation()
+            
             wandb.log({
                 'epoch':epoch+1,
                 'train_loss':ep_loss,
@@ -151,14 +169,38 @@ class JNDTrainer:
                     path = os.path.join(self.args.output, checkpoint_prefix)
                     self.save_model(path)
 
+def ddp_setup(rank, world_size):
+    """
+    Args:
+        rank: Unique identifier of each process
+        world_size: Total number of processes
+    """
+    os.environ["MASTER_ADDR"] = "localhost"
+    os.environ["MASTER_PORT"] = "12355"
+    init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
+def main(rank, world_size, args):
+    keep_prob_drop=1
 
-    def main(args):
-        keep_prob_drop=1
+    if args.type!='linear' or args.type!='finetune':
+        keep_prob_drop=0.70
 
-        if args.type!='linear' or args.type!='finetune':
-            keep_prob_drop=0.70
+    if args.parallel:
+        ddp_setup(rank, world_size)
+        if rank == 0:
+            print(args)
+            available_gpus = [
+                torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())
+            ]
+            print(f"Available gpus:{available_gpus}")
 
+        train_ds, val_ds = load_data(root=args.root, 
+                                     path_root=args.path_root, 
+                                     batch_size=args.batch_size, 
+                                     n_cpu=1,
+                                     split_ratio=0.7, 
+                                     parallel=True)
+    else:
         train_ds, val_ds = load_data(root=args.root, 
                                      path_root=args.path_root, 
                                      batch_size=args.batch_size, 
@@ -166,17 +208,30 @@ class JNDTrainer:
                                      split_ratio=0.7, 
                                      parallel=False)
 
-        trainer = JNDTrainer(args=args, 
-                             train_dataloader=train_ds, 
-                             val_dataloader=val_ds,
-                             in_channels=1, 
-                             n_layers=args.num_layers, 
-                             keep_prob=keep_prob_drop, 
-                             norm_type=args.loss_norm)
-       
+    trainer = JNDTrainer(args=args, 
+                         train_dataloader=train_ds, 
+                         val_dataloader=val_ds,
+                         in_channels=1, 
+                         n_layers=args.num_layers, 
+                         keep_prob=keep_prob_drop, 
+                         norm_type=args.loss_norm,
+                         gpu_id=rank)
+    
 
-    if __name__=='__main__':
-        ARGS = argument_parser().parse_args()
-        main(ARGS)
+if __name__=='__main__':
+    ARGS = argument_parser().parse_args()
+    
+    output = f"{ARGS.output}/{ARGS.exp}"
+    os.makedirs(output, exist_ok=True)
+
+    world_size = torch.cuda.device_count()
+    print(f"World size:{world_size}")
+    if ARGS.parallel:
+        mp.spawn(main, args=(world_size, ARGS), nprocs=world_size)
+    else:
+        if ARGS.gpu:
+            main(0, world_size, ARGS)
+        else:
+            main(None, world_size, ARGS)
 
     
