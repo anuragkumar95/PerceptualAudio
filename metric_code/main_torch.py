@@ -105,7 +105,7 @@ class JNDTrainer:
             wav_in = wav_in.to(self.gpu_id)
             wav_out = wav_out.to(self.gpu_id)
             labels = labels.to(self.gpu_id)
-        labels = F.one_hot(labels, 2)
+        #labels = F.one_hot(labels, 2)
 
         logits = self.model(inp=wav_in, ref=wav_out)
         loss = F.cross_entropy(logits, labels).mean()
