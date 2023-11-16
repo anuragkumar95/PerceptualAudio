@@ -41,7 +41,7 @@ def argument_parser():
     parser.add_argument('--pretrained_model_path', help='Model Path for the pretrained model', default='../pre-model/pretrained_loss')
     parser.add_argument('--batch_size', help='batch_size', default=16,type=int)
     parser.add_argument('--dummy_test', help='batch_size', default=0,type=int)
-    parser.add_argument('--resample16k', help='resample to 16kHz', default=1,type=int)
+    parser.add_argument('--resample16k', help='resample to 16kHz', action='store_true')
     parser.add_argument('--gpu', help='set this flag for single gpu training', action='store_true')
     parser.add_argument('--parallel', help='set this flag for parallel gpu training', action='store_true')
     
@@ -199,14 +199,16 @@ def main(rank, world_size, args):
                                      path_root=args.path_root, 
                                      batch_size=args.batch_size, 
                                      n_cpu=1,
-                                     split_ratio=0.7, 
+                                     split_ratio=0.7,
+                                     resample=args.resample16k, 
                                      parallel=True)
     else:
         train_ds, val_ds = load_data(root=args.root, 
                                      path_root=args.path_root, 
                                      batch_size=args.batch_size, 
                                      n_cpu=1,
-                                     split_ratio=0.7, 
+                                     split_ratio=0.7,
+                                     resample=args.resample16k,  
                                      parallel=False)
 
     trainer = JNDTrainer(args=args, 

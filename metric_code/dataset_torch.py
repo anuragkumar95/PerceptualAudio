@@ -94,7 +94,7 @@ class JNDDataset(Dataset):
         return inp, out, label
 
     
-def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, parallel=False):
+def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=None, parallel=False):
     torchaudio.set_audio_backend("sox_io")  # in linux
     
     train_indices = {'combined':[], 'reverb':[], 'linear':[], 'eq':[]}
@@ -108,8 +108,8 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, parallel=Fals
         train_indices[key] = train_indices
         test_indices[key] = test_indices
 
-    train_ds = JNDDataset(root, path_root, train_indices, resample=None)
-    test_ds = JNDDataset(root, path_root, test_indices, resample=None)
+    train_ds = JNDDataset(root, path_root, train_indices, resample=resample)
+    test_ds = JNDDataset(root, path_root, test_indices, resample=resample)
 
     if parallel:
         train_dataset = torch.utils.data.DataLoader(
