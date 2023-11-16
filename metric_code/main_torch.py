@@ -10,6 +10,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from network_model_torch import JNDModel
 
+from dataset_torch import load_data
+
 wandb.login()
 
 def argument_parser():
@@ -17,6 +19,9 @@ def argument_parser():
     Get an argument parser for a training script.
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-r', '--root', required=True, help='root dir where the wavs are stored')
+    parser.add_Argument('-o', '--output', required=True, help='path to store saved checkpoints.')
+    parser.add_Argument('--paths', help='path to the dir containing list of paths and labels.')
     parser.add_argument('--layers', help='number of layers in the model', default=14, type=int)
     parser.add_argument('--learning_rate', help='learning rate', default=1e-4, type=float)
     parser.add_argument('--summary_folder', help='summary folder name', default='m_example')
@@ -60,6 +65,7 @@ class JNDTrainer:
 
         self.train_ds = train_dataloader
         self.val_ds = val_dataloader
+        self.args = args
 
         wandb.init(project=args.exp)
 
@@ -121,8 +127,7 @@ class JNDTrainer:
 
                 logits = self.model(inp=wav_in, ref=wav_out)
                 loss = F.cross_entropy(logits, labels).mean()
-                    
-                val_loss += batch_loss
+                val_loss += loss
 
         val_loss = val_loss / num_batches
         return val_loss
@@ -132,13 +137,18 @@ class JNDTrainer:
         for epoch in range(epochs):
             ep_loss = self.train_one_epoch()
             val_loss = self.run_validation()
+            wandb.log({
+                'epoch':epoch+1,
+                'train_loss':ep_loss,
+                'val_loss':val_loss
+            })
             print(f"EPOCH:{epoch} | TRAIN_LOSS:{ep_loss} | VAL_LOSS:{val_loss}")
 
             if best_val >= val_loss:
                 best_val = val_loss
                 if self.gpu_id == 0:
                     checkpoint_prefix = f"{args.exp}_val_{val_loss}_epoch_{epoch}.pt"
-                    path = os.path.join(args.output, checkpoint_prefix)
+                    path = os.path.join(self.args.output, checkpoint_prefix)
                     self.save_model(path)
 
 
@@ -149,14 +159,21 @@ class JNDTrainer:
         if args.type!='linear' or args.type!='finetune':
             keep_prob_drop=0.70
 
-        trainer = JNDTrainer(args, 
-                             train_dataloader, 
-                             val_dataloader,
+        train_ds, val_ds = load_data(root=args.root, 
+                                     path_root=args.path_root, 
+                                     batch_size=args.batch_size, 
+                                     n_cpu=1,
+                                     split_ratio=0.7, 
+                                     parallel=False)
+
+        trainer = JNDTrainer(args=args, 
+                             train_dataloader=train_ds, 
+                             val_dataloader=val_ds,
                              in_channels=1, 
                              n_layers=args.num_layers, 
                              keep_prob=keep_prob_drop, 
                              norm_type=args.loss_norm)
-        pass
+       
 
     if __name__=='__main__':
         ARGS = argument_parser().parse_args()
