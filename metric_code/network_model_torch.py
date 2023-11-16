@@ -28,13 +28,13 @@ class LossNet(nn.Module):
                                   out_channels,
                                   (1, kernel_size),
                                   stride=(1, 2),
-                                  padding='same')
+                                  padding=1)
             else:
                 layer = nn.Conv2d(prev_out, 
                                   out_channels,
                                   (1, kernel_size),
                                   stride=(1, 2),
-                                  padding='same')
+                                  padding=1)
             
             layers.append(layer)
 

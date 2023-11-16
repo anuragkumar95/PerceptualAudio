@@ -31,7 +31,7 @@ def argument_parser():
     parser.add_argument('--learning_rate', help='learning rate', default=1e-4, type=float)
     parser.add_argument('--summary_folder', help='summary folder name', default='m_example')
     parser.add_argument('--optimiser', help='choose optimiser - gd/adam', default='adam')
-    parser.add_argument('--loss_norm', help='loss norm - NM,SBN,None', default='SBN')
+    parser.add_argument('--loss_norm', help='loss norm - NM,SBN,None', default='sbn')
     parser.add_argument('--channels_increase', help='doubling channels after how many layers - 1,2,3,4,5,6', default=5, type=int)
     parser.add_argument('--loss_layers', help='loss to be taken for the first how many layers', default=14, type=int)
     parser.add_argument('--filter_size', help='filter size for the convolutions', default=3, type=int)
