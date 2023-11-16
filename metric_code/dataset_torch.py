@@ -92,6 +92,7 @@ class JNDDataset(Dataset):
             inp = torch.cat([pad, inp], dim=0)
 
         label = torch.LongTensor(self.paths['labels'][idx])
+        print(f"label:{label.shape}, inp:{inp.shape}, out:{out.shape}")
         return inp, out, label
 
     
