@@ -196,7 +196,7 @@ def main(rank, world_size, args):
             print(f"Available gpus:{available_gpus}")
 
         train_ds, val_ds = load_data(root=args.root, 
-                                     path_root=args.path_root, 
+                                     path_root=args.paths, 
                                      batch_size=args.batch_size, 
                                      n_cpu=1,
                                      split_ratio=0.7,
@@ -204,7 +204,7 @@ def main(rank, world_size, args):
                                      parallel=True)
     else:
         train_ds, val_ds = load_data(root=args.root, 
-                                     path_root=args.path_root, 
+                                     path_root=args.paths, 
                                      batch_size=args.batch_size, 
                                      n_cpu=1,
                                      split_ratio=0.7,
