@@ -28,6 +28,12 @@ class LossNet(nn.Module):
                         nm_torch(),
                         nn.Dropout(1 - keep_prob)
                     )
+                if norm_type == 'none':
+                    layer = nn.Sequential(
+                        nn.Conv2d(in_channels, out_channels, (1, kernel_size), (1, 2), padding=1),
+                        nn.Dropout(1 - keep_prob)
+                    )
+
             elif i == n_layers - 1:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
@@ -38,6 +44,10 @@ class LossNet(nn.Module):
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2), padding=1),
                         nm_torch()
+                    )
+                if norm_type == 'none':
+                    layer = nn.Sequential(
+                        nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2), padding=1),
                     )
             else:
                 if norm_type == 'sbn':
@@ -50,6 +60,11 @@ class LossNet(nn.Module):
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2), padding=1),
                         nm_torch(),
+                        nn.Dropout(1 - keep_prob)
+                    )
+                if norm_type == 'none':
+                    layer = nn.Sequential(
+                        nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2), padding=1),
                         nn.Dropout(1 - keep_prob)
                     )
             self.net.append(layer)
