@@ -123,10 +123,9 @@ class JNDModel(nn.Module):
 
         others, loss_sum = self.feature_loss(ref, inp)
         others = torch.stack(others)
-        print(f"others:{others.shape}")
+        #print(f"others:{others.shape}")
         dist = self.sigmoid(others.mean(0)).reshape(-1, 1)
-
-        logits = self.classification_layer(dist).squeeze(1)
+        logits = self.classification_layer(dist)
         return logits
 
 
