@@ -215,7 +215,7 @@ def main(rank, world_size, args):
                          train_dataloader=train_ds, 
                          val_dataloader=val_ds,
                          in_channels=1, 
-                         n_layers=args.num_layers, 
+                         n_layers=args.layers, 
                          keep_prob=keep_prob_drop, 
                          norm_type=args.loss_norm,
                          gpu_id=rank)
