@@ -102,18 +102,17 @@ def collate_fn(batch):
     max_len = 0
     for sample in batch:
         max_len = max(max_len, sample[0].shape[-1])
-
-    for sample in batch:
-        print(sample[-1])
-    
+   
     final_dims = (len(batch), max_len)
     new_inp = sample[0].data.new(*final_dims).fill_(0)
-    new_out = sample[1].data.new(*final_dims).fill_(0)   
+    new_out = sample[1].data.new(*final_dims).fill_(0)
+
     for i, sample in enumerate(batch):
         new_inp[i, :sample[0].shape[-1]] = sample[0][0]
         new_out[i, :sample[1].shape[-1]] = sample[1][0]
+
     new_inp = new_inp.unsqueeze(1).unsqueeze(-1)
-    new_out = new_inp.unsqueeze(1).unsqueeze(-1)
+    new_out = new_out.unsqueeze(1).unsqueeze(-1)
     labels = torch.stack([sample[-1] for sample in batch])
     print(f"Collate: inp:{new_inp.shape}, out:{new_out.shape}, labels:{labels.shape}")
     return new_inp, new_out, labels
