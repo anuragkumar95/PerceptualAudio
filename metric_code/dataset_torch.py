@@ -91,7 +91,7 @@ class JNDDataset(Dataset):
 
         print(f"label:{self.paths['labels'][idx]}")
 
-        label = torch.LongTensor(self.paths['labels'][idx])
+        label = torch.tensor(self.paths['labels'][idx], dtype=torch.LongTensor)
         return inp, out, label
 
 def collate_fn(batch):
