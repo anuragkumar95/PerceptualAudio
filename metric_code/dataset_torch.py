@@ -76,13 +76,17 @@ class JNDDataset(Dataset):
 
         inp, i_sr = torchaudio.load(inp_file)
         out, o_sr = torchaudio.load(out_file)
+        print(f"Before resample: inp:{inp.shape}, out:{out.shape}")
 
         if self.resample is not None:
             inp = F.resample(inp, orig_freq=i_sr, new_freq=self.resample)
             out = F.resample(out, orig_freq=o_sr, new_freq=self.resample)
-
+        
+        print(f"After resample: inp:{inp.shape}, out:{out.shape}")
         inp = inp.squeeze()
         out = out.squeeze()
+
+        print(f"After squeeze: inp:{inp.shape}, out:{out.shape}")
 
         #Pad signals so that they have equal length
         pad = torch.zeros(abs(inp.shape[0] - out.shape[0]))
@@ -90,6 +94,8 @@ class JNDDataset(Dataset):
             out = torch.cat([pad, out], dim=0)
         if out.shape[0] > inp.shape[0]:
             inp = torch.cat([pad, inp], dim=0)
+
+        print(f"After pad: inp:{inp.shape}, out:{out.shape}")
 
         label = torch.LongTensor(self.paths['labels'][idx])
         print(f"label:{label.shape}, inp:{inp.shape}, out:{out.shape}")
