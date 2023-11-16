@@ -14,7 +14,7 @@ import os
 import numpy as np
 
 class JNDDataset(Dataset):
-    def __init__(self, root, path_root, indices, resample=None):
+    def __init__(self, root, path_root, indices, resample=False):
         self.data_root = root
         self.indices = indices
         self.resample = resample
@@ -78,7 +78,7 @@ class JNDDataset(Dataset):
         out, o_sr = torchaudio.load(out_file)
         print(f"Before resample: inp:{inp.shape}, out:{out.shape}")
 
-        if self.resample is not None:
+        if self.resample:
             inp = F.resample(inp, orig_freq=i_sr, new_freq=self.resample)
             out = F.resample(out, orig_freq=o_sr, new_freq=self.resample)
         
