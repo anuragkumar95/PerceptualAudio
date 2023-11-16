@@ -19,6 +19,7 @@ class JNDDataset(Dataset):
         self.indices = indices
         self.resample = resample
         self.paths = self.collect_paths(path_root)
+        print(self.paths['labels'])
         
     def collect_paths(self, root):
         paths = {'input' : [],
@@ -43,7 +44,6 @@ class JNDDataset(Dataset):
                 out = os.path.join(self.data_root, out)
                 paths['input'].append(inp)
                 paths['output'].append(out)
-                print(f"Label:{label}")
                 paths['labels'].append(int(label))
 
         with open(os.path.join(root, 'dataset_linear.txt'), 'r') as f:
