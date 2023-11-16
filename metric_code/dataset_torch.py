@@ -19,7 +19,7 @@ class JNDDataset(Dataset):
         self.indices = indices
         self.resample = resample
         self.paths = self.collect_paths(path_root)
-        print(self.paths['labels'])
+        #print(self.paths['labels'])
         
     def collect_paths(self, root):
         paths = {'input' : [],
@@ -88,6 +88,8 @@ class JNDDataset(Dataset):
             out = torch.cat([pad, out], dim=1)
         if out.shape[-1] > inp.shape[-1]:
             inp = torch.cat([pad, inp], dim=1)
+
+        print(f"label:{self.paths['labels'][idx]}")
 
         label = torch.LongTensor(self.paths['labels'][idx])
         return inp, out, label
