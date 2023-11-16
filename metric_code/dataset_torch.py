@@ -28,7 +28,7 @@ class JNDDataset(Dataset):
         with open(os.path.join(root, 'dataset_combined.txt'), 'r') as f:
             lines = f.readlines()
             for idx in self.indices['combined']:
-                inp, out, label = lines[idx].split('\t')
+                inp, out, label = lines[idx].strip().split('\t')
                 inp = os.path.join(self.data_root, inp)
                 out = os.path.join(self.data_root, out)
                 paths['input'].append(inp)
@@ -38,7 +38,7 @@ class JNDDataset(Dataset):
         with open(os.path.join(root, 'dataset_reverb.txt'), 'r') as f:
             lines = f.readlines()
             for idx in self.indices['reverb']:
-                inp, out, label = lines[idx].split('\t')
+                inp, out, label = lines[idx]..strip().split('\t')
                 inp = os.path.join(self.data_root, inp)
                 out = os.path.join(self.data_root, out)
                 paths['input'].append(inp)
@@ -48,7 +48,7 @@ class JNDDataset(Dataset):
         with open(os.path.join(root, 'dataset_linear.txt'), 'r') as f:
             lines = f.readlines()
             for idx in self.indices['linear']:
-                inp, out, label, noise = lines[idx].split('\t')
+                inp, out, label, noise = lines[idx].strip().split('\t')
                 inp = os.path.join(self.data_root, f"{noise}_list", inp)
                 out = os.path.join(self.data_root, f"{noise}_list", out)
                 paths['input'].append(inp)
@@ -58,7 +58,7 @@ class JNDDataset(Dataset):
         with open(os.path.join(root, 'dataset_eq.txt'), 'r') as f:
             lines = f.readlines()
             for idx in self.indices['eq']:
-                inp, out, label = lines[idx].split('\t')
+                inp, out, label = lines[idx]..strip().split('\t')
                 inp = os.path.join(self.data_root, inp)
                 out = os.path.join(self.data_root, out)
                 paths['input'].append(inp)
