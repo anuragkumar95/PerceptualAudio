@@ -102,7 +102,7 @@ class JNDDataset(Dataset):
         return inp, out, label
 
     
-def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=None, parallel=False):
+def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=False, parallel=False):
     torchaudio.set_audio_backend("sox_io")  # in linux
     
     train_indices = {'combined':[], 'reverb':[], 'linear':[], 'eq':[]}
@@ -115,7 +115,8 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=None
             test_indxs = [i for i in range(num_lines) if i not in train_indices]
         train_indices[key] = train_indxs
         test_indices[key] = test_indxs
-
+    if resample:
+        resample = 16000
     train_ds = JNDDataset(root, path_root, train_indices, resample=resample)
     test_ds = JNDDataset(root, path_root, test_indices, resample=resample)
 
