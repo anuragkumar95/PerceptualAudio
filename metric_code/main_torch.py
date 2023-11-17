@@ -130,6 +130,8 @@ class JNDTrainer:
             })
             print(f"EPOCH:{epoch+1} | STEP:{i+1} | LOSS:{batch_loss}")
             epoch_loss += batch_loss
+            if i > 2:
+                break
         epoch_loss = epoch_loss / num_batches
         return epoch_loss
 
