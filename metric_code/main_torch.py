@@ -130,8 +130,6 @@ class JNDTrainer:
             })
             print(f"EPOCH:{epoch+1} | STEP:{i+1} | LOSS:{batch_loss}")
             epoch_loss += batch_loss
-            if i > 2:
-                break
         epoch_loss = epoch_loss / num_batches
         return epoch_loss
 
@@ -145,7 +143,6 @@ class JNDTrainer:
                     wav_in = wav_in.to(self.gpu_id)
                     wav_out = wav_out.to(self.gpu_id)
                     labels = labels.to(self.gpu_id)
-                print(f"VAL | inp:{wav_in.shape} | out:{wav_out.shape} | labels:{labels}")
                 labels = labels.float()
                 logits = self.model(inp=wav_in, ref=wav_out).reshape(-1)
                 loss = self.criterion(logits, labels)
