@@ -172,7 +172,7 @@ class JNDTrainer:
                 best_val = val_loss
                 if self.gpu_id == 0:
                     checkpoint_prefix = f"{self.args.exp}_val_{val_loss}_epoch_{epoch}.pt"
-                    path = os.path.join(self.args.output, checkpoint_prefix)
+                    path = os.path.join(self.args.output, self.args.exp, checkpoint_prefix)
                     self.save_model(path)
 
 def ddp_setup(rank, world_size):
@@ -215,7 +215,7 @@ def main(rank, world_size, args):
                                      split_ratio=0.7,
                                      resample=args.resample16k,  
                                      parallel=False)
-    print(f"TRAIN:{len(train_ds)} VAL:{len(val_ds)} per each of the {rank} gpu/gpus...")
+    print(f"TRAIN:{len(train_ds)} VAL:{len(val_ds)} per each of the {rank+1} gpu/gpus...")
     trainer = JNDTrainer(args=args, 
                          train_dataloader=train_ds, 
                          val_dataloader=val_ds,
