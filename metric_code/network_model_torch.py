@@ -88,9 +88,7 @@ class LossNet(nn.Module):
     def forward(self, x):
         outs = []
         for layer in self.net:
-            print(f"inp:{x.shape}")
             x = layer(x)
-            print(f"layer_out:{x.shape}")
             outs.append(x)
         return outs
 
