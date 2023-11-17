@@ -132,7 +132,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
         with open(os.path.join(path_root, f'dataset_{key}.txt'), 'r') as f:
             num_lines = len(f.readlines())
             train_indxs = list(np.random.choice(num_lines, int(split_ratio * num_lines), replace=False))
-            test_indxs = [i for i in range(num_lines) if i not in train_indices]
+            test_indxs = [i for i in range(num_lines) if i not in train_indxs]
         train_indices[key].extend(train_indxs)
         test_indices[key].extend(test_indxs)
     if resample:
