@@ -572,7 +572,7 @@ combined_1/7.0_0.0_0.0_40.0_m7_script2_produced_clipped_125.0.wav	combined_1/16.
 combined_1/0.0_0.0_0.0_0.0_m6_script3_produced_clipped_130.0.wav	combined_1/0.0_0.0_0.0_30.48_m6_script3_produced_clipped_130.0.wav	0
 combined_1/71.0_0.0_0.0_0.0_f5_script4_produced_clipped_77.5.wav	combined_1/58.62_0.0_0.0_0.0_f5_script4_produced_clipped_77.5.wav	0
 combined_2/37.0_0.0_0.0_52.0_f1_script1_produced_clipped_65.0.wav	combined_2/54.14_0.0_0.0_58.59_f1_script1_produced_clipped_65.0.wav	1
-combined_3/60.0_0.0_0.0_0.0_m8_script2_produced_clipped_82.5.wav	combined_3/0.0_0.0_0.0_0.0_m8_script2_produced_clipped_82.5.wav	1
+combined_3/60.0_0.0_0.0_0.0_m8_script2_produced_clipped_82.5.wav	combined_3/60.0_0.0_0.0_0.0_m8_script2_produced_clipped_82.5.wav	1
 combined_3/0.0_82.0_40.0_0.0_m5_script3_produced_clipped_102.5.wav	combined_3/0.0_91.01_81.9_0.0_m5_script3_produced_clipped_102.5.wav	1
 combined_1/10.0_0.0_0.0_69.0_f7_script2_produced_clipped_102.5.wav	combined_1/10.0_0.0_0.0_69.0_f7_script2_produced_clipped_102.5.wav	0
 combined_1/68.0_86.0_46.0_62.0_m6_script4_produced_clipped_97.5.wav	combined_1/20.38_93.59_69.48_43.92_m6_script4_produced_clipped_97.5.wav	0
