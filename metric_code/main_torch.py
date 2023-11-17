@@ -209,7 +209,7 @@ def main(rank, world_size, args):
                                      split_ratio=0.7,
                                      resample=args.resample16k,  
                                      parallel=False)
-
+    print(f"TRAIN:{len(train_ds)} VAL:{len(val_ds)} per each of the {rank} gpu/gpus...")
     trainer = JNDTrainer(args=args, 
                          train_dataloader=train_ds, 
                          val_dataloader=val_ds,
