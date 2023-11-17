@@ -110,7 +110,6 @@ class JNDTrainer:
 
         labels = labels.float()
         logits = self.model(inp=wav_in, ref=wav_out).reshape(-1)
-        print(f"logits:{logits.shape}, labels:{labels.shape}")
         loss = self.criterion(logits, labels) 
 
         self.optimizer.zero_grad()
