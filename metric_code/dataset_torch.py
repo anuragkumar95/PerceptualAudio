@@ -82,7 +82,6 @@ class JNDDataset(Dataset):
             inp = F.resample(inp, orig_freq=i_sr, new_freq=self.resample)
             out = F.resample(out, orig_freq=o_sr, new_freq=self.resample)
 
-        print(f"inp:{inp.shape}, out:{out.shape}")
         #Pad signals so that they have equal length
         pad = torch.zeros(1, abs(inp.shape[-1] - out.shape[-1]))
         if inp.shape[-1] > out.shape[-1]:
