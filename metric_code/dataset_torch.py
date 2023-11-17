@@ -93,6 +93,8 @@ class JNDDataset(Dataset):
             label = torch.tensor(self.paths['labels'][idx])
             return inp, out, label
         except Exception as e:
+            print(f"Exception:{e}")
+            print(f"Skip, get next idx:{idx+1}")
             self.__getitem__(min(idx+1, self.__len__()))
 
 def collate_fn(batch):
