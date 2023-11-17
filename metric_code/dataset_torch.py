@@ -91,6 +91,7 @@ class JNDDataset(Dataset):
                 inp = torch.cat([pad, inp], dim=-1)
 
             label = torch.tensor(self.paths['labels'][idx])
+            print(f"inp:{inp.shape},{inp.permute(1, 0).shape} out:{out.shape},{out.permute(1, 0).shape}")
             return inp.permute(1, 0), out.permute(1, 0), label
         except Exception as e:
             self.__getitem__(min(idx+1, self.__len__()))
