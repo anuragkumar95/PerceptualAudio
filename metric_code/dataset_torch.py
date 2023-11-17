@@ -72,25 +72,28 @@ class JNDDataset(Dataset):
         return len(self.paths['input'])
  
     def __getitem__(self, idx):
-        inp_file = self.paths['input'][idx]
-        out_file = self.paths['output'][idx]
+        try:
+            inp_file = self.paths['input'][idx]
+            out_file = self.paths['output'][idx]
 
-        inp, i_sr = torchaudio.load(inp_file)
-        out, o_sr = torchaudio.load(out_file)
+            inp, i_sr = torchaudio.load(inp_file)
+            out, o_sr = torchaudio.load(out_file)
 
-        if self.resample:
-            inp = F.resample(inp, orig_freq=i_sr, new_freq=self.resample)
-            out = F.resample(out, orig_freq=o_sr, new_freq=self.resample)
+            if self.resample:
+                inp = F.resample(inp, orig_freq=i_sr, new_freq=self.resample)
+                out = F.resample(out, orig_freq=o_sr, new_freq=self.resample)
 
-        #Pad signals so that they have equal length
-        pad = torch.zeros(1, abs(inp.shape[-1] - out.shape[-1]))
-        if inp.shape[-1] > out.shape[-1]:
-            out = torch.cat([pad, out], dim=-1)
-        if out.shape[-1] > inp.shape[-1]:
-            inp = torch.cat([pad, inp], dim=-1)
+            #Pad signals so that they have equal length
+            pad = torch.zeros(1, abs(inp.shape[-1] - out.shape[-1]))
+            if inp.shape[-1] > out.shape[-1]:
+                out = torch.cat([pad, out], dim=-1)
+            if out.shape[-1] > inp.shape[-1]:
+                inp = torch.cat([pad, inp], dim=-1)
 
-        label = torch.tensor(self.paths['labels'][idx])
-        return inp, out, label
+            label = torch.tensor(self.paths['labels'][idx])
+            return inp, out, label
+        except Exception as e:
+            self.__getitem__(min(idx+1, self.__len__()))
 
 def collate_fn(batch):
     """
