@@ -20,6 +20,7 @@ class LossNet(nn.Module):
                     layer = nn.Sequential(
                         nn.Conv2d(in_channels, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
+                        nn.LeakyReLU(0.2),
                         nn.BatchNorm2d(out_channels),
                         nn.Dropout(1 - keep_prob),
                     )
@@ -27,6 +28,7 @@ class LossNet(nn.Module):
                     layer = nn.Sequential(
                         nn.Conv2d(in_channels, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
+                        nn.LeakyReLU(0.2),
                         nm_torch(),
                         nn.Dropout(1 - keep_prob)
                     )
@@ -34,6 +36,7 @@ class LossNet(nn.Module):
                     layer = nn.Sequential(
                         nn.Conv2d(in_channels, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
+                        nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob)
                     )
 
@@ -48,12 +51,14 @@ class LossNet(nn.Module):
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
+                        nn.LeakyReLU(0.2),
                         nm_torch()
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
+                        nn.LeakyReLU(0.2),
                     )
             else:
                 if norm_type == 'sbn':
@@ -67,6 +72,7 @@ class LossNet(nn.Module):
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
+                        nn.LeakyReLU(0.2),
                         nm_torch(),
                         nn.Dropout(1 - keep_prob)
                     )
@@ -74,6 +80,7 @@ class LossNet(nn.Module):
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
+                        nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob)
                     )
             self.net.append(layer)
@@ -93,7 +100,7 @@ class ClassificationHead(nn.Module):
         self.dense3 = nn.Linear(in_dim, 16)
         self.dense4 = nn.Linear(16, 6)
         self.dense2 = nn.Linear(6, out_dim)
-        self.relu = nn.LeakyReLU()
+        self.relu = nn.ReLU()
 
     def forward(self, x):
         out = self.relu(self.dense3(x))
