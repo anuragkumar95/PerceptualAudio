@@ -84,11 +84,11 @@ class JNDDataset(Dataset):
 
         print(f"inp:{inp.shape}, out:{out.shape}")
         #Pad signals so that they have equal length
-        pad = torch.zeros(abs(inp.shape[-1] - out.shape[-1]))
+        pad = torch.zeros(1, abs(inp.shape[-1] - out.shape[-1]))
         if inp.shape[-1] > out.shape[-1]:
-            out = torch.cat([pad, out], dim=1)
+            out = torch.cat([pad, out], dim=-1)
         if out.shape[-1] > inp.shape[-1]:
-            inp = torch.cat([pad, inp], dim=1)
+            inp = torch.cat([pad, inp], dim=-1)
 
         label = torch.tensor(self.paths['labels'][idx])
         return inp, out, label

@@ -68,51 +68,6 @@ class LossNet(nn.Module):
                         nn.Dropout(1 - keep_prob)
                     )
             self.net.append(layer)
-
-        """
-        for i in range(n_layers):
-            #Increase output channels every 5 layers
-            out_channels = 32 * (2 ** (i // 5))
-            prev_out = 32 * (2 ** ((i-1) // 5))
-            layers = nn.ModuleList()
-            if i == 0:
-                layer = nn.Conv2d(in_channels, 
-                                  out_channels, 
-                                  (1, kernel_size), 
-                                  stride=(1, 2),
-                                  padding=1)
-            elif i == n_layers - 1:
-                layer = nn.Conv2d(prev_out, 
-                                  out_channels,
-                                  (1, kernel_size),
-                                  stride=(1, 2),
-                                  padding=1)
-            else:
-                layer = nn.Conv2d(prev_out, 
-                                  out_channels,
-                                  (1, kernel_size),
-                                  stride=(1, 2),
-                                  padding=1)
-            
-            layers.append(layer)
-
-            if norm_type == 'sbn':
-                batch_norm = torch.nn.BatchNorm2d(out_channels)
-            elif norm_type == 'nm':
-                batch_norm = nm_torch()
-            elif norm_type == 'none':
-                batch_norm is None
-            else:
-                raise NotImplementedError
-            if batch_norm is not None:
-                layers.append(batch_norm)
-
-            if i < n_layers - 1:
-                dropout = nn.Dropout(1 - keep_prob)
-                layers.append(dropout)
-
-            self.net.append(layers)
-        """
         
     def forward(self, x):
         outs = []
