@@ -108,9 +108,10 @@ class JNDTrainer:
             wav_out = wav_out.to(self.gpu_id)
             labels = labels.to(self.gpu_id)
 
+        labels = labels.view(-1, 1).long()
         logits = self.model(inp=wav_in, ref=wav_out)
         print(f"logits:{logits.shape}, labels:{labels.shape}")
-        loss = self.criterion(logits, labels.view(-1, 1).long()) 
+        loss = self.criterion(logits, labels) 
 
         self.optimizer.zero_grad()
         loss.backward()
