@@ -123,7 +123,7 @@ class JNDTrainer:
         for i, batch in enumerate(self.train_ds):
             batch_loss = self.forward_one_step(batch)
             batch_loss.backward()
-            if (i + 1) % ACCUM_GRAD == 0
+            if (i + 1) % ACCUM_GRAD == 0:
                 self.optimizer.zero_grad()    
                 self.optimizer.step()
             wandb.log({
