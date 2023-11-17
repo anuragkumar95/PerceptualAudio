@@ -170,7 +170,7 @@ class JNDTrainer:
             if best_val >= val_loss:
                 best_val = val_loss
                 if self.gpu_id == 0:
-                    checkpoint_prefix = f"{args.exp}_val_{val_loss}_epoch_{epoch}.pt"
+                    checkpoint_prefix = f"{self.args.exp}_val_{val_loss}_epoch_{epoch}.pt"
                     path = os.path.join(self.args.output, checkpoint_prefix)
                     self.save_model(path)
 
