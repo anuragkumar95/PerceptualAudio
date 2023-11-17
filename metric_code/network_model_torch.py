@@ -19,21 +19,21 @@ class LossNet(nn.Module):
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
                         nn.Conv2d(in_channels, out_channels, (1, kernel_size), (1, 2)),
-                        ZeroPad2D(kernel_size),
+                        ZeroPad2D((1, kernel_size)),
                         nn.BatchNorm2d(out_channels),
                         nn.Dropout(1 - keep_prob),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
                         nn.Conv2d(in_channels, out_channels, (1, kernel_size), (1, 2)),
-                        ZeroPad2D(kernel_size),
+                        ZeroPad2D((1, kernel_size)),
                         nm_torch(),
                         nn.Dropout(1 - keep_prob)
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
                         nn.Conv2d(in_channels, out_channels, (1, kernel_size), (1, 2)),
-                        ZeroPad2D(kernel_size),
+                        ZeroPad2D((1, kernel_size)),
                         nn.Dropout(1 - keep_prob)
                     )
 
@@ -41,39 +41,39 @@ class LossNet(nn.Module):
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2)),
-                        ZeroPad2D(kernel_size),
+                        ZeroPad2D((1, kernel_size)),
                         nn.BatchNorm2d(out_channels),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2)),
-                        ZeroPad2D(kernel_size),
+                        ZeroPad2D((1, kernel_size)),
                         nm_torch()
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2)),
-                        ZeroPad2D(kernel_size),
+                        ZeroPad2D((1, kernel_size)),
                     )
             else:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2)),
-                        ZeroPad2D(kernel_size),
+                        ZeroPad2D((1, kernel_size)),
                         nn.BatchNorm2d(out_channels),
                         nn.Dropout(1 - keep_prob),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2), padding=1),
-                        ZeroPad2D(kernel_size),
+                        ZeroPad2D((1, kernel_size)),
                         nm_torch(),
                         nn.Dropout(1 - keep_prob)
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (1, kernel_size), (1, 2), padding=1),
-                        ZeroPad2D(kernel_size),
+                        ZeroPad2D((1, kernel_size)),
                         nn.Dropout(1 - keep_prob)
                     )
             self.net.append(layer)
