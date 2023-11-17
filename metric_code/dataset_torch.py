@@ -133,6 +133,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
             num_lines = len(f.readlines())
             train_indxs = list(np.random.choice(num_lines, int(split_ratio * num_lines), replace=False))
             test_indxs = [i for i in range(num_lines) if i not in train_indxs]
+            print(f"KEY:{key} | TRAIN:{len(train_idxs)} | VAL:{len(test_indxs)}")
         train_indices[key].extend(train_indxs)
         test_indices[key].extend(test_indxs)
     if resample:
