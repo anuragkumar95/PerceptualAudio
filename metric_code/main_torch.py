@@ -42,6 +42,7 @@ def argument_parser():
     parser.add_argument('--batch_size', help='batch_size', default=16,type=int)
     parser.add_argument('--dummy_test', help='batch_size', default=0,type=int)
     parser.add_argument('--resample16k', help='resample to 16kHz', action='store_true')
+    parser.add_argument('--accum_grad', type=int, default=2, help='no of steps to accumulate gradient')
     parser.add_argument('--gpu', help='set this flag for single gpu training', action='store_true')
     parser.add_argument('--parallel', help='set this flag for parallel gpu training', action='store_true')
     
@@ -101,7 +102,7 @@ class JNDTrainer:
                     }
         torch.save(save_dict, path)
 
-    def train_one_step(self, batch):
+    def forward_one_step(self, batch):
         wav_in, wav_out, labels = batch
         if self.gpu_id is not None:
             wav_in = wav_in.to(self.gpu_id)
@@ -112,24 +113,25 @@ class JNDTrainer:
         logits = self.model(inp=wav_in, ref=wav_out).reshape(-1)
         loss = self.criterion(logits, labels) 
 
-        self.optimizer.zero_grad()
-        loss.backward()
-
-        self.optimizer.step()
         return loss 
 
     
     def train_one_epoch(self, epoch):
         epoch_loss = 0
         num_batches = len(self.train_ds)
+        ACCUM_GRAD = self.args.accum_grad
         for i, batch in enumerate(self.train_ds):
-            batch_loss = self.train_one_step(batch)
+            batch_loss = self.forward_one_step(batch)
+            batch_loss.backward()
+            if (i + 1) % ACCUM_GRAD == 0
+                self.optimizer.zero_grad()    
+                self.optimizer.step()
             wandb.log({
                 'step':i+1,
                 'loss':batch_loss
             })
             print(f"EPOCH:{epoch+1} | STEP:{i+1} | LOSS:{batch_loss}")
-            epoch_loss += batch_loss
+            epoch_loss += batch_loss.detach()
         epoch_loss = epoch_loss / num_batches
         return epoch_loss
 
@@ -138,15 +140,8 @@ class JNDTrainer:
         num_batches = len(self.val_ds)
         with torch.no_grad():
             for i, batch in enumerate(self.val_ds):
-                wav_in, wav_out, labels = batch
-                if self.gpu_id is not None:
-                    wav_in = wav_in.to(self.gpu_id)
-                    wav_out = wav_out.to(self.gpu_id)
-                    labels = labels.to(self.gpu_id)
-                labels = labels.float()
-                logits = self.model(inp=wav_in, ref=wav_out).reshape(-1)
-                loss = self.criterion(logits, labels)
-                val_loss += loss
+                batch_loss = self.forward_one_step(batch)
+                val_loss += batch_loss.detach()
 
         val_loss = val_loss / num_batches
         return val_loss
