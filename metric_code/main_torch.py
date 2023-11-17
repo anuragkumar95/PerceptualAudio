@@ -68,7 +68,8 @@ class JNDTrainer:
                               norm_type,
                               gpu_id)
 
-        self.criterion = nn.CrossEntropyLoss(reduction='mean')
+        #self.criterion = nn.CrossEntropyLoss(reduction='mean')
+        self.criterion = nn.BCEWithLogitsLoss(reduction='mean')
         self.optimizer = torch.optim.AdamW(filter(lambda layer:layer.requires_grad,self.model.parameters()), 
                                            lr=args.learning_rate)
 
@@ -107,16 +108,13 @@ class JNDTrainer:
             wav_out = wav_out.to(self.gpu_id)
             labels = labels.to(self.gpu_id)
 
-        #labels = F.one_hot(labels, 2)
-
         logits = self.model(inp=wav_in, ref=wav_out)
         print(f"logits:{logits.shape}, labels:{labels.shape}")
-        loss = self.criterion(logits, labels)
-        #loss = F.binary_cross_entropy_with_logits(logits, labels) 
+        loss = self.criterion(logits, labels) 
 
         self.optimizer.zero_grad()
         loss.backward()
-        #torch.nn.utils.clip_grad_value_(self.model.parameters(), 5.0)
+
         self.optimizer.step()
         return loss 
 

@@ -135,7 +135,7 @@ class JNDModel(nn.Module):
                                 keep_prob=keep_prob, 
                                 norm_type=norm_type)
 
-        self.classification_layer = ClassificationHead(in_dim=1, out_dim=2)
+        self.classification_layer = ClassificationHead(in_dim=1, out_dim=1)
 
         self.feature_loss = FeatureLossBatch(n_layers=n_layers,
                                              base_channels=32,
