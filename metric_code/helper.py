@@ -5,6 +5,8 @@ import torch.nn.functional as F
 #import tensorflow as tf
 #import tensorflow.contrib.slim as slim
 from sklearn.preprocessing import normalize
+from functools import reduce
+from operator import __add__
 
 # LEAKY RELU UNIT
 def lrelu(x):
@@ -50,6 +52,12 @@ def nm(x):
     w1=tf.Variable(0.0,name='w1')
     return w0*x+w1*slim.batch_norm(x)
 """
+
+def ZeroPad2D(kernel_size):
+  conv_padding = reduce(__add__, 
+    [(k // 2 + (k - 2 * (k // 2)) - 1, k // 2) for k in kernel_size[::-1]])
+    pad = nn.ZeroPad2d(conv_padding)
+    return pad
 
 class nm_torch(nn.Module):
     def __init__(self,):
