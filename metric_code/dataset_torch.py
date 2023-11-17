@@ -92,7 +92,7 @@ class JNDDataset(Dataset):
 
             label = torch.tensor(self.paths['labels'][idx])
             print(f"inp:{inp.shape},{inp.permute(1, 0).shape} out:{out.shape},{out.permute(1, 0).shape}")
-            return inp.permute(1, 0), out.permute(1, 0), label
+            return inp, out, label
         except Exception as e:
             self.__getitem__(min(idx+1, self.__len__()))
 
@@ -110,9 +110,9 @@ def collate_fn(batch):
     new_out = sample[1].data.new(*final_dims).fill_(0)
 
     for i, sample in enumerate(batch):
-        new_inp[:sample[0].shape[0], i] = sample[0][0]
-        new_out[:sample[1].shape[0], i] = sample[1][0]
-    
+        new_inp[i, :sample[0].shape[-1]] = sample[0][0]
+        new_out[i, :sample[1].shape[-1]] = sample[1][0]
+
     new_inp = new_inp.unsqueeze(1).unsqueeze(-1)
     new_out = new_out.unsqueeze(1).unsqueeze(-1)
     labels = torch.stack([sample[-1] for sample in batch])
