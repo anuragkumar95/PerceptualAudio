@@ -143,7 +143,7 @@ class JNDTrainer:
                     wav_in = wav_in.to(self.gpu_id)
                     wav_out = wav_out.to(self.gpu_id)
                     labels = labels.to(self.gpu_id)
-                print(f"VAL | inp:{inp.shape} | out:{out.shape} | labels:{labels}")
+                print(f"VAL | inp:{wav_in.shape} | out:{wav_out.shape} | labels:{labels}")
                 labels = labels.float()
                 logits = self.model(inp=wav_in, ref=wav_out).reshape(-1)
                 loss = self.criterion(logits, labels)
