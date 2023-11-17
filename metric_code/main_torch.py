@@ -84,6 +84,7 @@ class JNDTrainer:
         self.train_ds = train_dataloader
         self.val_ds = val_dataloader
         self.args = args
+        self.parallel = args.parallel
 
         wandb.init(project=args.exp)
 
@@ -97,9 +98,14 @@ class JNDTrainer:
         del state_dict
 
     def save_model(self, path):
-        save_dict = {'model_state_dict':self.model.module.state_dict(), 
-                     'opt_state_dict':self.optimizer.state_dict(),
-                    }
+        if self.parallel:
+            save_dict = {'model_state_dict':self.model.module.state_dict(), 
+                        'opt_state_dict':self.optimizer.state_dict(),
+                        }
+        else:
+            save_dict = {'model_state_dict':self.model.state_dict(), 
+                        'opt_state_dict':self.optimizer.state_dict(),
+                        }
         torch.save(save_dict, path)
 
     def forward_one_step(self, batch):
