@@ -20,24 +20,24 @@ class LossNet(nn.Module):
                     layer = nn.Sequential(
                         nn.Conv2d(in_channels, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
-                        nn.LeakyReLU(0.2),
                         nn.BatchNorm2d(out_channels),
+                        nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
                         nn.Conv2d(in_channels, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
-                        nn.LeakyReLU(0.2),
                         nm_torch(out_channels),
+                        nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob)
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
                         nn.Conv2d(in_channels, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
+                        nn.Dropout(1 - keep_prob),
                         nn.LeakyReLU(0.2),
-                        nn.Dropout(1 - keep_prob)
                     )
 
             elif i == n_layers - 1:
@@ -46,13 +46,14 @@ class LossNet(nn.Module):
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
                         nn.BatchNorm2d(out_channels),
+                        nn.LeakyReLU(0.2),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
-                        nn.LeakyReLU(0.2),
                         nm_torch(out_channels)
+                        nn.LeakyReLU(0.2),   
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
@@ -66,14 +67,15 @@ class LossNet(nn.Module):
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
                         nn.BatchNorm2d(out_channels),
+                        nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
-                        nn.LeakyReLU(0.2),
                         nm_torch(out_channels),
+                        nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob)
                     )
                 if norm_type == 'none':
@@ -133,7 +135,7 @@ class FeatureLossBatch(nn.Module):
                 res = dist
             loss = l1_loss_batch_torch(res)
             loss_vec.append(loss)
-        return loss_vec, loss_vec
+        return loss_vec
 
 
 class JNDModel(nn.Module):
@@ -157,9 +159,8 @@ class JNDModel(nn.Module):
         ref = self.loss_net(ref)
         inp = self.loss_net(inp)
 
-        others, loss_sum = self.feature_loss(ref, inp)
+        others = self.feature_loss(ref, inp)
         others = torch.stack(others)
-        #print(f"others:{others.shape}")
         dist = self.sigmoid(others.mean(0)).reshape(-1, 1)
         logits = self.classification_layer(dist)
         return logits
