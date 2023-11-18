@@ -203,7 +203,7 @@ def main(rank, world_size, args):
                                      path_root=args.paths, 
                                      batch_size=args.batch_size, 
                                      n_cpu=1,
-                                     split_ratio=0.7,
+                                     split_ratio=0.85,
                                      resample=args.resample16k, 
                                      parallel=True)
     else:
@@ -211,7 +211,7 @@ def main(rank, world_size, args):
                                      path_root=args.paths, 
                                      batch_size=args.batch_size, 
                                      n_cpu=1,
-                                     split_ratio=0.7,
+                                     split_ratio=0.85,
                                      resample=args.resample16k,  
                                      parallel=False)
     print(f"TRAIN:{len(train_ds)} VAL:{len(val_ds)} per each of the {rank+1} gpu/gpus...")
