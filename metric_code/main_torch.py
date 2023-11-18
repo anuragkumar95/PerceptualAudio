@@ -71,8 +71,7 @@ class JNDTrainer:
 
         #self.criterion = nn.CrossEntropyLoss(reduction='mean')
         self.criterion = nn.BCEWithLogitsLoss(reduction='mean')
-        self.optimizer = torch.optim.AdamW(filter(lambda layer:layer.requires_grad,self.model.parameters()), 
-                                           lr=args.learning_rate)
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=args.learning_rate)
 
         if gpu_id is not None:
             self.model = self.model.to(gpu_id)

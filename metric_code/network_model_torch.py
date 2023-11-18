@@ -52,7 +52,7 @@ class LossNet(nn.Module):
                     layer = nn.Sequential(
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
-                        nm_torch(out_channels)
+                        nm_torch(out_channels),
                         nn.LeakyReLU(0.2),   
                     )
                 if norm_type == 'none':
