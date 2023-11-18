@@ -60,15 +60,16 @@ def ZeroPad2D(kernel_size):
   return pad
 
 class nm_torch(nn.Module):
-    def __init__(self,):
+    def __init__(self, out_channels):
         super().__init__()
         self.w0 = torch.tensor(1.0, requires_grad=True)
         self.w1 = torch.tensor(0.0, requires_grad=True)
+        self.batch_norm = nn.BatchNorm2d(out_channels)
 
     def forward(self, x):
-        return (self.w0 * x) + (self.w1 * F.batch_norm(x))
+        return (self.w0 * x) + (self.w1 * self. batch_norm(x))
 
-
+"""
 # IDENTITY INITIALIZATION OF CONV LAYERS
 def identity_initializer():
     def _initializer(shape, dtype=tf.float32, partition_info=None):
@@ -80,7 +81,7 @@ def identity_initializer():
     return _initializer
 
 # L1 LOSS FUNCTION
-"""
+
 def l1_loss(target,current):
     return tf.reduce_mean(tf.abs(target-current))
 

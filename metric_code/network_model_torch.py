@@ -29,7 +29,7 @@ class LossNet(nn.Module):
                         nn.Conv2d(in_channels, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
                         nn.LeakyReLU(0.2),
-                        nm_torch(),
+                        nm_torch(out_channels),
                         nn.Dropout(1 - keep_prob)
                     )
                 if norm_type == 'none':
@@ -52,7 +52,7 @@ class LossNet(nn.Module):
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
                         nn.LeakyReLU(0.2),
-                        nm_torch()
+                        nm_torch(out_channels)
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
@@ -73,7 +73,7 @@ class LossNet(nn.Module):
                         nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
                         ZeroPad2D((kernel_size, 1)),
                         nn.LeakyReLU(0.2),
-                        nm_torch(),
+                        nm_torch(out_channels),
                         nn.Dropout(1 - keep_prob)
                     )
                 if norm_type == 'none':
@@ -149,7 +149,8 @@ class JNDModel(nn.Module):
 
         self.feature_loss = FeatureLossBatch(n_layers=n_layers,
                                              base_channels=32,
-                                             gpu_id=gpu_id)
+                                             gpu_id=gpu_id,
+                                             weights=True)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inp, ref):
