@@ -62,8 +62,8 @@ def ZeroPad2D(kernel_size):
 class nm_torch(nn.Module):
     def __init__(self, out_channels):
         super().__init__()
-        self.w0 = nn.Parameter(1.0, requires_grad=True)
-        self.w1 = nn.Parameter(0.0, requires_grad=True)
+        self.w0 = nn.Parameter(torch.ones(1), requires_grad=True)
+        self.w1 = nn.Parameter(torch.zeros(1), requires_grad=True)
         self.batch_norm = nn.BatchNorm2d(out_channels)
 
     def forward(self, x):
