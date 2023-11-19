@@ -3,9 +3,6 @@
 @author: Anurag Kumar
 """
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import numpy 
 
 from torch.utils.data import Dataset, DataLoader
 import torchaudio
@@ -14,13 +11,15 @@ import os
 import numpy as np
 
 class JNDDataset(Dataset):
-    def __init__(self, root, path_root, indices, resample=False):
+    def __init__(self, root, path_root, indices, cut_len=40000, resample=False, shift=False):
         self.data_root = root
         self.indices = indices
         self.resample = resample
         self.paths = self.collect_paths(path_root)
-        #print(self.paths['labels'])
-        
+        self.cut_len = cut_len
+        #TODO:Implement random shift for shift invariance
+        self.rand_shift = shift
+
     def collect_paths(self, root):
         paths = {'input' : [],
                  'output': [],
@@ -72,30 +71,28 @@ class JNDDataset(Dataset):
         return len(self.paths['input'])
  
     def __getitem__(self, idx):
-        try:
-            inp_file = self.paths['input'][idx]
-            out_file = self.paths['output'][idx]
+     
+        inp_file = self.paths['input'][idx]
+        out_file = self.paths['output'][idx]
 
-            inp, i_sr = torchaudio.load(inp_file)
-            out, o_sr = torchaudio.load(out_file)
+        inp, i_sr = torchaudio.load(inp_file)
+        out, o_sr = torchaudio.load(out_file)
 
-            if self.resample:
-                inp = F.resample(inp, orig_freq=i_sr, new_freq=self.resample)
-                out = F.resample(out, orig_freq=o_sr, new_freq=self.resample)
+        if self.resample:
+            inp = F.resample(inp, orig_freq=i_sr, new_freq=self.resample)
+            out = F.resample(out, orig_freq=o_sr, new_freq=self.resample)
+    
+        inp = inp[:, :min(inp.shape[-1], out.shape[-1], self.cut_len)]
+        out = out[:, :min(inp.shape[-1], out.shape[-1], self.cut_len)]
 
-            #Pad signals so that they have equal length
-            pad = torch.zeros(1, abs(inp.shape[-1] - out.shape[-1]))
-            if inp.shape[-1] > out.shape[-1]:
-                out = torch.cat([pad, out], dim=-1)
-            if out.shape[-1] > inp.shape[-1]:
-                inp = torch.cat([pad, inp], dim=-1)
+        if inp.shape[-1] < self.cut_len: 
+            pad = torch.zeros(1, self.cut_len - inp.shape[-1])
+            inp = torch.cat([pad, inp], dim=-1)
+            out = torch.cat([pad, out], dim=-1)
 
-            label = torch.tensor(self.paths['labels'][idx])
-            return inp, out, label
-        except Exception as e:
-            print(f"Exception:{e}")
-            print(f"Skip, get next idx:{idx+1}")
-            self.__getitem__(min(idx+1, self.__len__()))
+        label = torch.tensor(self.paths['labels'][idx])
+        return inp, out, label
+      
 
 def collate_fn(batch):
     """
@@ -150,7 +147,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
             sampler=DistributedSampler(train_ds),
             drop_last=True,
             num_workers=n_cpu,
-            collate_fn=collate_fn,
+            #collate_fn=collate_fn,
         )
         test_dataset = DataLoader(
             dataset=test_ds,
@@ -160,7 +157,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
             sampler=DistributedSampler(test_ds),
             drop_last=True,
             num_workers=n_cpu,
-            collate_fn=collate_fn,
+            #collate_fn=collate_fn,
         )
     else:
         train_dataset = DataLoader(
@@ -170,7 +167,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
             shuffle=True,
             drop_last=False,
             num_workers=n_cpu,
-            collate_fn=collate_fn,
+            #collate_fn=collate_fn,
         )
         test_dataset = DataLoader(
             dataset=test_ds,
@@ -179,7 +176,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
             shuffle=True,
             drop_last=False,
             num_workers=n_cpu,
-            collate_fn=collate_fn,
+            #collate_fn=collate_fn,
         )
 
     return train_dataset, test_dataset
