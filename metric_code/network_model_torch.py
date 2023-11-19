@@ -133,6 +133,7 @@ class FeatureLossBatch(nn.Module):
                 res = self.weights[i] * dist
             else:
                 res = dist
+            print(f"feature_loss:{res.shape}")
             loss = l1_loss_batch_torch(res)
             loss_vec.append(loss)
         return loss_vec
@@ -163,7 +164,7 @@ class JNDModel(nn.Module):
         dist = torch.stack(others).mean(0)
         dist = self.sigmoid(dist).reshape(-1, 1, 1)
         logits = self.classification_layer(dist)
-        print(f"pred:{logits.shape}")
+        
         return logits
 
 
