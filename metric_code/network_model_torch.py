@@ -138,12 +138,10 @@ class FeatureLossBatch(nn.Module):
         for i, (e1, e2) in enumerate(zip(embeds1, embeds2)):
             dist = e1 - e2
             dist = dist.permute(0, 1, 3, 2)
-            print(f"dist:{dist.shape}, weight:{self.weights[i].shape}")
             if self.weights is not None:
                 res = self.weights[i] * dist
             else:
                 res = dist
-            print(f"feature_loss:{res.shape}")
             loss = l1_loss_batch_torch(res)
             loss_vec.append(loss)
         return loss_vec
