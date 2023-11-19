@@ -91,7 +91,7 @@ class JNDDataset(Dataset):
             out = torch.cat([pad, out], dim=-1)
 
         label = torch.tensor(self.paths['labels'][idx])
-        return inp, out, label
+        return inp.squeeze(0), out.squeeze(0), label
       
 
 def collate_fn(batch):
