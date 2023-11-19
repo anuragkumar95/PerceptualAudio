@@ -113,8 +113,9 @@ class FeatureLossBatch(nn.Module):
     def __init__(self, n_layers, base_channels, weights=False, gpu_id=None):
         super().__init__()
         self.out_channels = [base_channels * (2 ** (i // 5)) for i in range(n_layers)]
+        self.out_dims = [40000 / (2 ** i) for i in range(n_layers)]
         if weights:
-            self.weights = [nn.Parameter(torch.randn(features, 1), requires_grad=True) for features in self.out_channels]
+            self.weights = [nn.Parameter(torch.randn(features, 1, out_dim), requires_grad=True) for features, out_dim in zip(self.out_channels, self.out_dims)]
             if gpu_id is not None:
                 self.weights = [param.to(gpu_id) for param in self.weights]
         else:
