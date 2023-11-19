@@ -114,11 +114,12 @@ class FeatureLossBatch(nn.Module):
         super().__init__()
         self.out_channels = [base_channels * (2 ** (i // 5)) for i in range(n_layers)]
         self.out_dims = []
+        out_dim = 20000
         for i in range(n_layers):
             if out_dim % 2 == 0: 
-                out_dim = 20000 // (2 ** i)
+                out_dim = out_dim // (2 ** i)
             else:
-                out_dim = 20000 // (2 ** i) + 1
+                out_dim = out_dim // (2 ** i) + 1
             self.out_dims.append(out_dim)
 
         if weights:
