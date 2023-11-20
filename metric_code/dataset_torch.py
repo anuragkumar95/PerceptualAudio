@@ -90,8 +90,8 @@ class JNDDataset(Dataset):
             inp = torch.cat([pad, inp], dim=-1)
             out = torch.cat([pad, out], dim=-1)
 
-        inp = inp.reshape(1, -1)
-        out = out.reshape(1, -1)
+        inp = inp.reshape(-1)
+        out = out.reshape(-1)
 
         label = torch.tensor(self.paths['labels'][idx])
         return inp, out, label
