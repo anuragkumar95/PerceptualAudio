@@ -128,8 +128,8 @@ class JNDTrainer:
         #labels = labels.float()
         #logits = self.model(inp=wav_in, ref=wav_out).reshape(-1)
         #loss = self.criterion(logits, labels) 
-        labels = F.one_hot(labels, num_classes=2)
-        _, _, class_prob = self.model(inp=wav_in, ref=wav_out)
+        labels = labels.long().reshape(-1)
+        _, _, class_prob = self.model(xper=wav_in, xref=wav_out)
         loss = self.criterion(class_prob, labels)
         return loss 
 

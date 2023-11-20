@@ -313,7 +313,7 @@ class JNDnet(nn.Module):
         #self.CE = nn.CrossEntropyLoss(reduction='mean')
         self.dev = dev
     
-    def forward(self,xref,xper,labels):
+    def forward(self,xref,xper):
         dist = self.model_dist.forward(xref,xper)
         pred = self.model_classif.forward(dist)
 #        loss = self.CE(pred,labels.squeeze(1)) # pred is [batch,2] and labels [batch] long and binary
