@@ -129,12 +129,13 @@ class FeatureLossBatch(nn.Module):
         loss_vec = []
         for i, (e1, e2) in enumerate(zip(embeds1, embeds2)):
             dist = e1 - e2
+            print(f"dist:{dist.shape}")
             dist = dist.permute(0, 3, 2, 1)
             print(f"dist:{dist.shape}")
             if self.weights is not None:
-                res = self.weights[i] * dist
+                res = (self.weights[i] * dist).permute(0, 3, 1, 2)
             else:
-                res = dist
+                res = dist.permute(0, 3, 1, 2)
             print(f"w_dist:{res.shape}")
             loss = l1_loss_batch_torch(res)
             loss_vec.append(loss)
@@ -169,7 +170,8 @@ class JNDModel(nn.Module):
         inp = self.loss_net_inp(inp)
 
         others = self.feature_loss(ref, inp)
-        dist = torch.stack(others).mean(0)
+        #Add up the layer distances for all layers
+        dist = torch.stack(others).sum(0)
         dist = self.sigmoid(dist).reshape(-1, 1, 1)
         logits = self.classification_layer(dist)
         
