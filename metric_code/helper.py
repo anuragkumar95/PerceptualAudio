@@ -8,13 +8,14 @@ from sklearn.preprocessing import normalize
 from functools import reduce
 from operator import __add__
 
+"""
 # LEAKY RELU UNIT
 def lrelu(x):
     return tf.maximum(0.2*x,x)
 
 
 # GENERATE DILATED LAYER FROM 1D SIGNAL
-"""
+
 def signal_to_dilated(signal, dilation, n_channels):
     shape = tf.shape(signal)
     pad_elements = dilation - 1 - (shape[2] + dilation - 1) % dilation

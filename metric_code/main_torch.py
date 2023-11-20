@@ -8,7 +8,7 @@ import argparse
 import wandb
 import torch.nn as nn
 import torch.nn.functional as F
-from network_model_torch import JNDModel
+from network_model_torch import JNDModel, JNDnet
 
 from dataset_torch import load_data
 
@@ -62,15 +62,26 @@ class JNDTrainer:
                  keep_prob, 
                  norm_type='sbn',
                  gpu_id=None):
-
+        """
         self.model = JNDModel(in_channels, 
                               n_layers, 
                               keep_prob, 
                               norm_type,
                               gpu_id)
-
-        #self.criterion = nn.CrossEntropyLoss(reduction='mean')
-        self.criterion = nn.BCEWithLogitsLoss(reduction='mean')
+        """
+        self.model = JNDnet(nconv=n_layers,
+                            nchan=32,
+                            dist_dp=0.1,
+                            dist_act='no',
+                            ndim=[16,6],
+                            classif_dp=0.1,
+                            classif_BN=0,
+                            classif_act='no',
+                            dev=gpu_id,
+                            minit=0)
+        
+        self.criterion = nn.CrossEntropyLoss(reduction='mean')
+        #self.criterion = nn.BCEWithLogitsLoss(reduction='mean')
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=args.learning_rate)
 
         if gpu_id is not None:
@@ -114,10 +125,12 @@ class JNDTrainer:
             wav_out = wav_out.to(self.gpu_id)
             labels = labels.to(self.gpu_id)
 
-        labels = labels.float()
-        logits = self.model(inp=wav_in, ref=wav_out).reshape(-1)
-        loss = self.criterion(logits, labels) 
-
+        #labels = labels.float()
+        #logits = self.model(inp=wav_in, ref=wav_out).reshape(-1)
+        #loss = self.criterion(logits, labels) 
+        labels = F.one_hot(labels, num_classes=2)
+        _, _, class_prob = self.model(inp=wav_in, ref=wav_out)
+        loss = self.criterion(class_prob, labels)
         return loss 
 
     
