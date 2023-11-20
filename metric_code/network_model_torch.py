@@ -113,17 +113,9 @@ class FeatureLossBatch(nn.Module):
     def __init__(self, n_layers, base_channels, weights=False, gpu_id=None):
         super().__init__()
         self.out_channels = [base_channels * (2 ** (i // 5)) for i in range(n_layers)]
-        self.out_dims = []
-        out_dim = 40000
-        for _ in range(n_layers):
-            if out_dim % 2 == 0: 
-                out_dim = out_dim // 2
-            else:
-                out_dim = (out_dim // 2) + 1
-            self.out_dims.append(out_dim)
-
+ 
         if weights:
-            self.weights = [nn.Parameter(torch.randn(features, 1, out_dim), requires_grad=True) for features, out_dim in zip(self.out_channels, self.out_dims)]
+            self.weights = [nn.Parameter(torch.randn(features), requires_grad=True) for features in self.out_channels]
             if gpu_id is not None:
                 self.weights = [param.to(gpu_id) for param in self.weights]
         else:
@@ -137,11 +129,13 @@ class FeatureLossBatch(nn.Module):
         loss_vec = []
         for i, (e1, e2) in enumerate(zip(embeds1, embeds2)):
             dist = e1 - e2
-            dist = dist.permute(0, 1, 3, 2)
+            dist = dist.permute(0, 3, 2, 1)
+            print(f"dist:{dist.shape}")
             if self.weights is not None:
                 res = self.weights[i] * dist
             else:
                 res = dist
+            print(f"w_dist:{res.shape}")
             loss = l1_loss_batch_torch(res)
             loss_vec.append(loss)
         return loss_vec
