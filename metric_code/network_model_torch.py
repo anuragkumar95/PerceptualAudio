@@ -147,13 +147,14 @@ class JNDModel(nn.Module):
                                 kernel_size=3, 
                                 keep_prob=keep_prob, 
                                 norm_type=norm_type)
-        
+        """
         self.loss_net_out = LossNet(in_channels=in_channels, 
                                 n_layers=n_layers, 
                                 kernel_size=3, 
                                 keep_prob=keep_prob, 
                                 norm_type=norm_type)
 
+        """
         self.classification_layer = ClassificationHead(in_dim=1, out_dim=1)
 
         self.feature_loss = FeatureLossBatch(n_layers=n_layers,
@@ -163,7 +164,7 @@ class JNDModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inp, ref):
-        ref = self.loss_net_out(ref)
+        ref = self.loss_net_inp(ref)
         inp = self.loss_net_inp(inp)
 
         others = self.feature_loss(ref, inp)
