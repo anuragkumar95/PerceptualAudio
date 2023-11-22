@@ -137,7 +137,7 @@ def load_data(root, path_root, batch_size, n_cpu, split_ratio=0.7, resample=Fals
         train_indices[key].extend(train_indxs)
         test_indices[key].extend(test_indxs)
     if resample:
-        resample = 22050
+        resample = 16000
     train_ds = JNDDataset(root, path_root, train_indices, resample=resample)
     test_ds = JNDDataset(root, path_root, test_indices, resample=resample)
 

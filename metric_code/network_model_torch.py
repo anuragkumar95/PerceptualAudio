@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy 
 from helper import *
+from sklearn.metrics import classification_report
 
 
 class LossNet(nn.Module):
@@ -101,13 +102,14 @@ class ClassificationHead(nn.Module):
         self.dense3 = nn.Linear(in_dim, 16)
         self.dense4 = nn.Linear(16, 6)
         self.dense2 = nn.Linear(6, out_dim)
-        self.relu = nn.ReLU()
+        self.relu = nn.LeakyReLU(0.2)
+        self.softmax = nn.Softmax(dim = -1)
 
     def forward(self, x):
         out = self.relu(self.dense3(x))
         out = self.relu(self.dense4(out))
         out = self.dense2(out)
-        return out
+        return self.softmax(out)
 
                 
 class FeatureLossBatch(nn.Module):
@@ -127,7 +129,7 @@ class FeatureLossBatch(nn.Module):
         Both embeds1 and embeeds are outputs from each layer of
         loss_net. 
         """
-        loss_vec = []
+        loss_final = 0
         for i, (e1, e2) in enumerate(zip(embeds1, embeds2)):
             dist = e1 - e2
             dist = dist.permute(0, 3, 2, 1)
@@ -136,27 +138,20 @@ class FeatureLossBatch(nn.Module):
             else:
                 res = dist.permute(0, 3, 1, 2)
             loss = l1_loss_batch_torch(res)
-            loss_vec.append(loss)
-        return loss_vec
+            loss_final += loss
+        return loss_final
 
 
 class JNDModel(nn.Module):
     def __init__(self, in_channels, n_layers, keep_prob, norm_type='sbn', gpu_id=None):
         super().__init__()
-        self.loss_net_inp = LossNet(in_channels=in_channels, 
+        self.loss_net = LossNet(in_channels=in_channels, 
                                 n_layers=n_layers, 
                                 kernel_size=3, 
                                 keep_prob=keep_prob, 
                                 norm_type=norm_type)
-        """
-        self.loss_net_out = LossNet(in_channels=in_channels, 
-                                n_layers=n_layers, 
-                                kernel_size=3, 
-                                keep_prob=keep_prob, 
-                                norm_type=norm_type)
-
-        """
-        self.classification_layer = ClassificationHead(in_dim=1, out_dim=1)
+        
+        self.classification_layer = ClassificationHead(in_dim=1, out_dim=2)
 
         self.feature_loss = FeatureLossBatch(n_layers=n_layers,
                                              base_channels=32,
@@ -165,19 +160,15 @@ class JNDModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inp, ref):
-        ref = self.loss_net_inp(ref)
-        inp = self.loss_net_inp(inp)
+        ref = self.loss_net(ref)
+        inp = self.loss_net(inp)
 
-        others = self.feature_loss(ref, inp)
-        #Add up the layer distances for all layers
-        dist = torch.stack(others).sum(0)
-        dist = self.sigmoid(dist).reshape(-1, 1, 1)
+        dist = self.feature_loss(ref, inp)
+        dist = self.sigmoid(dist).reshape(-1, 1)
         logits = self.classification_layer(dist)
         
         return logits
     
-
-
 
 
 '''

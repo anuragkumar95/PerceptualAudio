@@ -41,7 +41,7 @@ def dilated_to_signal(dilated, pad_elements, n_channels):
 def dilated_to_signal_torch(dilated, pad_elements, n_channels):
     shape = dilated.shape
     signal = dilated.permute(0, 2, 1, 3)
-    signal = tf.reshape(signal, [shape[0],1,-1,n_channels])
+    #signal = tf.reshape(signal, [shape[0],1,-1,n_channels])
     signal = signal.reshape(shape[0], 1, -1, n_channels)
     return signal[ :, :, :shape[1] * shape[2] - pad_elements, :]
 
