@@ -68,24 +68,24 @@ class LossNet(nn.Module):
             if i == 0:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
-                        nn.Conv2d(in_channels, out_channels, (kernel_size, 1), (2, 1)),
-                        nn.ZeroPad2d((0, 0, 0, 1)),
+                        nn.Conv2d(in_channels, out_channels, kernel_size, 2, padding='same'),
+                        #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.BatchNorm2d(out_channels),
                         nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
-                        nn.Conv2d(in_channels, out_channels, (kernel_size, 1), (2, 1)),
-                        nn.ZeroPad2d((0, 0, 0, 1)),
+                        nn.Conv2d(in_channels, out_channels, kernel_size, 2, padding='same'),
+                        #nn.ZeroPad2d((0, 0, 0, 1)),
                         nm_torch(out_channels),
                         nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob)
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
-                        nn.Conv2d(in_channels, out_channels, (kernel_size, 1), (2, 1)),
-                        nn.ZeroPad2d((0, 0, 0, 1)),
+                        nn.Conv2d(in_channels, out_channels, kernel_size, 2, padding='same'),
+                        #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.Dropout(1 - keep_prob),
                         nn.LeakyReLU(0.2),
                     )
@@ -93,45 +93,45 @@ class LossNet(nn.Module):
             elif i == n_layers - 1:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
-                        nn.ZeroPad2d((0, 0, 0, 1)),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.BatchNorm2d(out_channels),
                         nn.LeakyReLU(0.2),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
-                        nn.ZeroPad2d((0, 0, 0, 1)),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        #nn.ZeroPad2d((0, 0, 0, 1)),
                         nm_torch(out_channels),
                         nn.LeakyReLU(0.2),   
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
-                        nn.ZeroPad2d((0, 0, 0, 1)),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.LeakyReLU(0.2),
                     )
             else:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
-                        nn.ZeroPad2d((0, 0, 0, 1)),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.BatchNorm2d(out_channels),
                         nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
-                        nn.ZeroPad2d((0, 0, 0, 1)),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        #nn.ZeroPad2d((0, 0, 0, 1)),
                         nm_torch(out_channels),
                         nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob)
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, (kernel_size, 1), (2, 1)),
-                        nn.ZeroPad2d((0, 0, 0, 1)),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob)
                     )
@@ -203,32 +203,27 @@ class FeatureLossBatch(nn.Module):
 class JNDModel(nn.Module):
     def __init__(self, in_channels, n_layers=14, keep_prob=0.7, norm_type='sbn', sum_till=14, gpu_id=None):
         super().__init__()
-        #self.loss_net_inp = LossNet(in_channels=in_channels, 
-        #                        n_layers=n_layers, 
-        #                        kernel_size=3, 
-        #                        keep_prob=keep_prob, 
-        #                        norm_type=norm_type)
-        
-        self.loss_net = Discriminator(ndf=32, in_channel=in_channels)
+        self.loss_net_inp = LossNet(in_channels=in_channels, 
+                                n_layers=n_layers, 
+                                kernel_size=3, 
+                                keep_prob=keep_prob, 
+                                norm_type=norm_type)
 
         self.classification_layer = ClassificationHead(in_dim=1, out_dim=2)
 
-        #self.feature_loss = FeatureLossBatch(n_layers=n_layers,
-        #                                     base_channels=32,
-        #                                     gpu_id=gpu_id,
-        #                                     weights=True,
-        #                                     sum_till=sum_till)
+        self.feature_loss = FeatureLossBatch(n_layers=n_layers,
+                                             base_channels=32,
+                                             gpu_id=gpu_id,
+                                             weights=True,
+                                             sum_till=sum_till)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inp, ref):
-        #ref = self.loss_net(ref)
-        #inp = self.loss_net(inp)
-        #print(f"inp:{inp.shape}, ref:{ref.shape}")
-        logits = self.loss_net(inp, ref)
-        #dist = self.feature_loss(ref, inp)
-        #dist = self.sigmoid(dist).reshape(-1, 1)
-        #print(f"DIST:{dist.shape}")
-        #logits = self.classification_layer(dist)
+        ref = self.loss_net(ref)
+        inp = self.loss_net(inp)
+        dist = self.feature_loss(ref, inp)
+        dist = self.sigmoid(dist).reshape(-1, 1)
+        logits = self.classification_layer(dist)
         
         return logits
     

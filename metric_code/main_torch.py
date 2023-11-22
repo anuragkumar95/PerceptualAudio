@@ -81,8 +81,8 @@ class JNDTrainer:
                             dev=gpu_id,
                             minit=0)
         """
-        #self.criterion = nn.CrossEntropyLoss(reduction='mean')
-        self.criterion = nn.BCELoss(reduction='mean')
+        self.criterion = nn.CrossEntropyLoss(reduction='mean')
+        #self.criterion = nn.BCELoss(reduction='mean')
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=args.learning_rate)
 
         if gpu_id is not None:
@@ -173,8 +173,8 @@ class JNDTrainer:
 
         wav_in, wav_out = self.create_spectrograms(wav_in, wav_out)
         
-        labels = labels.float().reshape(-1)
-        probs = self.model(inp=wav_in, ref=wav_out).reshape(-1)
+        labels = labels.long().reshape(-1)
+        probs = self.model(inp=wav_in, ref=wav_out)
         loss = self.criterion(probs, labels) 
         #_, _, class_prob = self.model(xper=wav_in, xref=wav_out)
         #loss = self.criterion(class_prob, labels)
@@ -278,7 +278,7 @@ def main(rank, world_size, args):
     trainer = JNDTrainer(args=args, 
                          train_dataloader=train_ds, 
                          val_dataloader=val_ds,
-                         in_channels=2, 
+                         in_channels=1, 
                          n_layers=args.layers, 
                          keep_prob=keep_prob_drop, 
                          norm_type=args.loss_norm,
