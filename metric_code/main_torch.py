@@ -99,7 +99,46 @@ class JNDTrainer:
 
         wandb.init(project=args.exp)
 
-                
+    def create_spectrograms(self, noisy, clean):
+        """
+        Create spectrograms from input waveform.
+        ARGS:
+            clean : clean waveform (batch * cut_len)
+            noisy : noisy waveform (batch * cut_len)
+
+        Return
+            noisy_spec : (b * 2 * f * t) noisy spectrogram
+            clean_spec : (b * 2 * f * t) clean spectrogram
+        """
+        # Normalization
+        c = torch.sqrt(noisy.size(-1) / torch.sum((noisy**2.0), dim=-1))
+        noisy, clean = torch.transpose(noisy, 0, 1), torch.transpose(clean, 0, 1)
+        noisy, clean = torch.transpose(noisy * c, 0, 1), torch.transpose(
+            clean * c, 0, 1
+        )
+
+        win = torch.hamming_window(self.n_fft)
+        if self.gpu_id is not None:
+            win = win.to(self.gpu_id)
+
+        noisy_spec = torch.stft(
+            noisy,
+            self.n_fft,
+            self.hop,
+            window=win,
+            onesided=True,
+        )
+        clean_spec = torch.stft(
+            clean,
+            self.n_fft,
+            self.hop,
+            window=win,
+            onesided=True,
+        )
+        #noisy_spec = power_compress(noisy_spec).permute(0, 1, 3, 2)
+        #clean_spec = power_compress(clean_spec)
+
+        return noisy_spec, clean_spec           
                         
     def load_model(self, path):
         state_dict = torch.load(path, map_location=torch.device(self.gpu_id))
@@ -123,9 +162,11 @@ class JNDTrainer:
         wav_in, wav_out, labels = batch
         b, len = wav_in.shape
         if self.gpu_id is not None:
-            wav_in = wav_in.reshape(b, 1, len, 1).to(self.gpu_id)
-            wav_out = wav_out.reshape(b, 1, len, 1).to(self.gpu_id)
+            wav_in = wav_in.to(self.gpu_id)
+            wav_out = wav_out.to(self.gpu_id)
             labels = labels.to(self.gpu_id)
+
+        wav_in, wav_out = self.create_spectrograms(wav_in, wav_out)
         
         labels = labels.long().reshape(-1)
         probs = self.model(inp=wav_in, ref=wav_out)

@@ -8,7 +8,54 @@ import torch.nn.functional as F
 import numpy 
 from helper import *
 
+class LearnableSigmoid(nn.Module):
+    def __init__(self, in_features, beta=1):
+        super().__init__()
+        self.beta = beta
+        self.slope = nn.Parameter(torch.ones(in_features))
+        self.slope.requiresGrad = True
 
+    def forward(self, x):
+        return self.beta * torch.sigmoid(self.slope * x)
+
+class Discriminator(nn.Module):
+    def __init__(self,n_layers, ndf, in_channel=2):
+        super().__init__()
+
+        self.layers = nn.Sequential(
+            nn.utils.spectral_norm(
+                nn.Conv2d(in_channel, ndf, (4, 4), (2, 2), (1, 1), bias=False)
+            ),
+            nn.InstanceNorm2d(ndf, affine=True),
+            nn.PReLU(ndf),
+            nn.utils.spectral_norm(
+                nn.Conv2d(ndf, ndf * 2, (4, 4), (2, 2), (1, 1), bias=False)
+            ),
+            nn.InstanceNorm2d(ndf * 2, affine=True),
+            nn.PReLU(2 * ndf),
+            nn.utils.spectral_norm(
+                nn.Conv2d(ndf * 2, ndf * 4, (4, 4), (2, 2), (1, 1), bias=False)
+            ),
+            nn.InstanceNorm2d(ndf * 4, affine=True),
+            nn.PReLU(4 * ndf),
+            nn.utils.spectral_norm(
+                nn.Conv2d(ndf * 4, ndf * 8, (4, 4), (2, 2), (1, 1), bias=False)
+            ),
+            nn.InstanceNorm2d(ndf * 8, affine=True),
+            nn.PReLU(8 * ndf),
+            nn.AdaptiveMaxPool2d(1),
+            nn.Flatten(),
+            nn.utils.spectral_norm(nn.Linear(ndf * 8, ndf * 4)),
+            nn.Dropout(0.3),
+            nn.PReLU(4 * ndf),
+            nn.utils.spectral_norm(nn.Linear(ndf * 4, 1)),
+            LearnableSigmoid(1),
+        )
+
+
+    def forward(self, x, y):
+        xy = torch.cat([x, y], dim=1)
+        return self.layers(xy)
 
 class LossNet(nn.Module):
     def __init__(self, in_channels, n_layers, kernel_size, keep_prob, norm_type='sbn'):
@@ -156,27 +203,31 @@ class FeatureLossBatch(nn.Module):
 class JNDModel(nn.Module):
     def __init__(self, in_channels, n_layers, keep_prob, norm_type='sbn', sum_till=14, gpu_id=None):
         super().__init__()
-        self.loss_net_inp = LossNet(in_channels=in_channels, 
-                                n_layers=n_layers, 
-                                kernel_size=3, 
-                                keep_prob=keep_prob, 
-                                norm_type=norm_type)
+        #self.loss_net_inp = LossNet(in_channels=in_channels, 
+        #                        n_layers=n_layers, 
+        #                        kernel_size=3, 
+        #                        keep_prob=keep_prob, 
+        #                        norm_type=norm_type)
         
+        self.loss_net = Discriminator(ndf=32, in_channel=in_channels)
+
         self.classification_layer = ClassificationHead(in_dim=1, out_dim=2)
 
-        self.feature_loss = FeatureLossBatch(n_layers=n_layers,
-                                             base_channels=32,
-                                             gpu_id=gpu_id,
-                                             weights=True,
-                                             sum_till=sum_till)
+        #self.feature_loss = FeatureLossBatch(n_layers=n_layers,
+        #                                     base_channels=32,
+        #                                     gpu_id=gpu_id,
+        #                                     weights=True,
+        #                                     sum_till=sum_till)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inp, ref):
-        ref = self.loss_net_inp(ref)
-        inp = self.loss_net_inp(inp)
+        #ref = self.loss_net(ref)
+        #inp = self.loss_net(inp)
 
-        dist = self.feature_loss(ref, inp)
+        dist = self.loss_net(inp, ref)
+        #dist = self.feature_loss(ref, inp)
         dist = self.sigmoid(dist).reshape(-1, 1)
+
         logits = self.classification_layer(dist)
         
         return logits
