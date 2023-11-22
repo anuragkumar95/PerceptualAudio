@@ -145,7 +145,7 @@ class FeatureLossBatch(nn.Module):
 class JNDModel(nn.Module):
     def __init__(self, in_channels, n_layers, keep_prob, norm_type='sbn', gpu_id=None):
         super().__init__()
-        self.loss_net = LossNet(in_channels=in_channels, 
+        self.loss_net_inp = LossNet(in_channels=in_channels, 
                                 n_layers=n_layers, 
                                 kernel_size=3, 
                                 keep_prob=keep_prob, 
@@ -160,8 +160,8 @@ class JNDModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inp, ref):
-        ref = self.loss_net(ref)
-        inp = self.loss_net(inp)
+        ref = self.loss_net_inp(ref)
+        inp = self.loss_net_inp(inp)
 
         dist = self.feature_loss(ref, inp)
         dist = self.sigmoid(dist).reshape(-1, 1)
