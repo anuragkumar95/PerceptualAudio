@@ -117,21 +117,21 @@ class JNDTrainer:
             clean * c, 0, 1
         )
 
-        win = torch.hamming_window(self.n_fft)
+        win = torch.hamming_window(400)
         if self.gpu_id is not None:
             win = win.to(self.gpu_id)
 
         noisy_spec = torch.stft(
             noisy,
-            self.n_fft,
-            self.hop,
+            400,
+            100,
             window=win,
             onesided=True,
         )
         clean_spec = torch.stft(
             clean,
-            self.n_fft,
-            self.hop,
+            400,
+            100,
             window=win,
             onesided=True,
         )
