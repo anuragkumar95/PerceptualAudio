@@ -137,9 +137,13 @@ class JNDTrainer:
         )
         #noisy_spec = power_compress(noisy_spec).permute(0, 1, 3, 2)
         #clean_spec = power_compress(clean_spec)
-        noisy_spec = noisy_spec.permute(0, 1, 3, 2)
-        clean_spec = clean_spec.permute(0, 1, 3, 2)
-        return noisy_spec, clean_spec           
+        noisy_spec = noisy_spec.permute(0, 3, 2, 1)
+        clean_spec = clean_spec.permute(0, 3, 2, 1)
+
+        noisy_mag = torch.sqrt(noisy_spec[:, 0, :, :]**2 + noisy_spec[:, 1, :, :]**2).unsqueeze(1)
+        clean_mag = torch.sqrt(noisy_spec[:, 0, :, :]**2 + noisy_spec[:, 1, :, :]**2).unsqueeze(1)
+
+        return noisy_mag, clean_mag          
                         
     def load_model(self, path):
         state_dict = torch.load(path, map_location=torch.device(self.gpu_id))
