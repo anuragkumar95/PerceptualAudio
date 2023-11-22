@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import argparse
+from tqdm import tqdm
 
 from dataset_torch import load_data
 from network_model_torch import JNDModel, JNDnet
@@ -14,7 +15,7 @@ class Inference:
     def predict(self, dataset):
         labels = []
         preds = []
-        for i, batch in enumerate(dataset):
+        for batch in tqdm(dataset):
             
             wav_in, wav_out, labels = batch
             if self.gpu_id is not None:
@@ -80,7 +81,8 @@ def main(ARGS):
                        minit=0)
         
     model = load_model(ARGS.pt, model)
-        
+    print(f"Model loaded from {ARGS.pt}")
+    print(f"Running inference...")
     INFERENCE = Inference(model, gpu_id)
     INFERENCE.predict(val_ds)
 
