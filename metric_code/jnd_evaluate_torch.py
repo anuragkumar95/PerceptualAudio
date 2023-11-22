@@ -33,7 +33,9 @@ class Inference:
         print(classification_report(labels, preds))
 
 def load_model(path, model):
-    pass
+    state_dict = torch.load(path)
+    model.load_state_dict(state_dict['model_state_dict'])
+    return model
 
 def args():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -76,6 +78,8 @@ def main(ARGS):
                        classif_act='no',
                        dev=gpu_id,
                        minit=0)
+        
+    model = load_model(ARGS.pt, model)
         
     INFERENCE = Inference(model, gpu_id)
     INFERENCE.predict(val_ds)
