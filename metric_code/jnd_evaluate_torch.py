@@ -8,9 +8,10 @@ from network_model_torch import JNDModel, JNDnet
 from sklearn.metrics import classification_report
 
 class Inference:
-    def __init__(self, jnd_model, gpu_id=None):
+    def __init__(self, jnd_model, gpu_id=None, type=0):
         self.model = jnd_model
         self.gpu_id = gpu_id
+        self.type = type
 
     def predict(self, dataset):
         labels = []
@@ -22,9 +23,14 @@ class Inference:
                 wav_in = wav_in.to(self.gpu_id)
                 wav_out = wav_out.to(self.gpu_id)
                 labels = labels.to(self.gpu_id)
-
-            logits = self.model(wav_in, wav_out)
-            preds = torch.argmax(logits, dim=-1).reshape(-1)
+            
+            if self.type==0:
+                logits = self.model(wav_in, wav_out)
+                preds = torch.argmax(logits, dim=-1).reshape(-1)
+            if self.type == 1:
+                _, preds, _ = self.model(wav_in, wav_out)
+                preds = preds.reshape(-1)
+            
             labels.extend(labels.detach().cpu().numpy().tolist())
             preds.extend(labels.detach().cpu().numpy().tolist())
 
@@ -83,7 +89,7 @@ def main(ARGS):
     model = load_model(ARGS.pt, model.to(gpu_id))
     print(f"Model loaded from {ARGS.pt}")
     print(f"Running inference...")
-    INFERENCE = Inference(model, gpu_id)
+    INFERENCE = Inference(model, gpu_id, ARGS.type)
     INFERENCE.predict(val_ds)
 
 if __name__=='__main__':
