@@ -103,13 +103,19 @@ class ClassificationHead(nn.Module):
         self.dense4 = nn.Linear(16, 6)
         self.dense2 = nn.Linear(6, out_dim)
         self.relu = nn.LeakyReLU(0.2)
+        self.sigmoid = nn.Sigmoid(dim = -1)
         self.softmax = nn.Softmax(dim = -1)
+        self.outputs = out_dim
 
     def forward(self, x):
         out = self.relu(self.dense3(x))
         out = self.relu(self.dense4(out))
         out = self.dense2(out)
-        return self.softmax(out)
+        if self.outputs == 1:
+            scores = self.sigmoid(out)
+        if self.outputs == 2:
+            scores = self.softmax(out)
+        return scores
 
                 
 class FeatureLossBatch(nn.Module):
@@ -151,7 +157,7 @@ class JNDModel(nn.Module):
                                 keep_prob=keep_prob, 
                                 norm_type=norm_type)
         
-        self.classification_layer = ClassificationHead(in_dim=1, out_dim=2)
+        self.classification_layer = ClassificationHead(in_dim=1, out_dim=1)
 
         self.feature_loss = FeatureLossBatch(n_layers=n_layers,
                                              base_channels=32,

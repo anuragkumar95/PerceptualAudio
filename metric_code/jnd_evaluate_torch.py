@@ -26,7 +26,10 @@ class Inference:
             
             if self.type==0:
                 logits = self.model(wav_in, wav_out)
-                preds = torch.argmax(logits, dim=-1).reshape(-1)
+                if logits.shape[-1] == 1:
+                    preds = (logits >= 0.5).int()
+                else:
+                    preds = torch.argmax(logits, dim=-1)
             if self.type == 1:
                 _, preds, _ = self.model(wav_in, wav_out)
                 preds = preds.reshape(-1)
