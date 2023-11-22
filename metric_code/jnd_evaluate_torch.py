@@ -14,8 +14,8 @@ class Inference:
         self.type = type
 
     def predict(self, dataset):
-        labels = []
-        preds = []
+        LABELS = []
+        PREDS = []
         for batch in tqdm(dataset):
             
             wav_in, wav_out, labels = batch
@@ -31,10 +31,10 @@ class Inference:
                 _, preds, _ = self.model(wav_in, wav_out)
                 preds = preds.reshape(-1)
             
-            labels.extend(labels.detach().cpu().numpy().tolist())
-            preds.extend(labels.detach().cpu().numpy().tolist())
+            LABELS.extend(labels.detach().cpu().numpy().tolist())
+            PREDS.extend(preds.detach().cpu().numpy().tolist())
 
-        self.score(labels, preds)
+        self.score(LABELS, PREDS)
 
     def score(self, labels, preds):
         print(classification_report(labels, preds))
