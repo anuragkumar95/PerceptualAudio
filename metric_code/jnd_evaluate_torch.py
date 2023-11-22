@@ -49,13 +49,13 @@ def args():
     return parser
 
 def main(ARGS):
-    train_ds, val_ds = load_data(root=args.root, 
-                                 path_root=args.paths, 
-                                 batch_size=args.batch_size, 
-                                 n_cpu=1,
-                                 split_ratio=0.85,
-                                 resample=args.resample16k, 
-                                 parallel=True)
+    _, val_ds = load_data(root=ARGS.root, 
+                          path_root=ARGS.paths, 
+                          batch_size=ARGS.batch_size, 
+                          n_cpu=1,
+                          split_ratio=0.85,
+                          resample=ARGS.resample16k, 
+                          parallel=False)
     
     if ARGS.gpu:
         gpu_id = 0
