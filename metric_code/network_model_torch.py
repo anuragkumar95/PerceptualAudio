@@ -68,7 +68,7 @@ class LossNet(nn.Module):
             if i == 0:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
-                        nn.Conv2d(in_channels, out_channels, kernel_size, 2, padding='same'),
+                        nn.Conv2d(in_channels, out_channels, kernel_size, 2, padding=1),
                         #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.BatchNorm2d(out_channels),
                         nn.LeakyReLU(0.2),
@@ -76,7 +76,7 @@ class LossNet(nn.Module):
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
-                        nn.Conv2d(in_channels, out_channels, kernel_size, 2, padding='same'),
+                        nn.Conv2d(in_channels, out_channels, kernel_size, 2, padding=1),
                         #nn.ZeroPad2d((0, 0, 0, 1)),
                         nm_torch(out_channels),
                         nn.LeakyReLU(0.2),
@@ -84,7 +84,7 @@ class LossNet(nn.Module):
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
-                        nn.Conv2d(in_channels, out_channels, kernel_size, 2, padding='same'),
+                        nn.Conv2d(in_channels, out_channels, kernel_size, 2, padding=1),
                         #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.Dropout(1 - keep_prob),
                         nn.LeakyReLU(0.2),
@@ -93,28 +93,28 @@ class LossNet(nn.Module):
             elif i == n_layers - 1:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding=1),
                         #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.BatchNorm2d(out_channels),
                         nn.LeakyReLU(0.2),
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding=1),
                         #nn.ZeroPad2d((0, 0, 0, 1)),
                         nm_torch(out_channels),
                         nn.LeakyReLU(0.2),   
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding=1),
                         #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.LeakyReLU(0.2),
                     )
             else:
                 if norm_type == 'sbn':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding=1),
                         #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.BatchNorm2d(out_channels),
                         nn.LeakyReLU(0.2),
@@ -122,7 +122,7 @@ class LossNet(nn.Module):
                     )
                 if norm_type == 'nm':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding=1),
                         #nn.ZeroPad2d((0, 0, 0, 1)),
                         nm_torch(out_channels),
                         nn.LeakyReLU(0.2),
@@ -130,7 +130,7 @@ class LossNet(nn.Module):
                     )
                 if norm_type == 'none':
                     layer = nn.Sequential(
-                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding='same'),
+                        nn.Conv2d(prev_out, out_channels, kernel_size, 2, padding=1),
                         #nn.ZeroPad2d((0, 0, 0, 1)),
                         nn.LeakyReLU(0.2),
                         nn.Dropout(1 - keep_prob)
