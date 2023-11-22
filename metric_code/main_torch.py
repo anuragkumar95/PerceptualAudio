@@ -33,7 +33,7 @@ def argument_parser():
     parser.add_argument('--optimiser', help='choose optimiser - gd/adam', default='adam')
     parser.add_argument('--loss_norm', help='loss norm - NM,SBN,None', default='sbn')
     parser.add_argument('--channels_increase', help='doubling channels after how many layers - 1,2,3,4,5,6', default=5, type=int)
-    parser.add_argument('--loss_layers', help='loss to be taken for the first how many layers', default=14, type=int)
+    parser.add_argument('--loss_layers', help='loss to be taken for the last how many layers', default=14, type=int)
     parser.add_argument('--filter_size', help='filter size for the convolutions', default=3, type=int)
     parser.add_argument('--train_from_checkpoint', help='train_from_checkpoint', default=0, type=int)
     parser.add_argument('--epochs', help='number of training epochs', default=2000, type=int)
@@ -62,11 +62,12 @@ class JNDTrainer:
                  keep_prob, 
                  norm_type='sbn',
                  gpu_id=None):
-        """
+        
         self.model = JNDModel(in_channels, 
                               n_layers, 
                               keep_prob, 
                               norm_type,
+                              args.loss_layers,
                               gpu_id)
         """
         self.model = JNDnet(nconv=n_layers,
@@ -79,7 +80,7 @@ class JNDTrainer:
                             classif_act='no',
                             dev=gpu_id,
                             minit=0)
-        
+        """
         self.criterion = nn.CrossEntropyLoss(reduction='mean')
         #self.criterion = nn.BCEWithLogitsLoss(reduction='mean')
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=args.learning_rate)
