@@ -104,8 +104,10 @@ class ClassificationHead(nn.Module):
         self.dense4 = nn.Linear(16, 6)
         self.dense2 = nn.Linear(6, out_dim)
         self.relu = nn.LeakyReLU(0.2)
-        self.sigmoid = nn.Sigmoid()
-        self.softmax = nn.Softmax(dim = -1)
+        if out_dim == 1:
+            self.sigmoid = nn.Sigmoid()
+        else:
+            self.softmax = nn.Softmax(dim = -1)
         self.outputs = out_dim
 
     def forward(self, x):
@@ -152,7 +154,7 @@ class FeatureLossBatch(nn.Module):
 
 
 class JNDModel(nn.Module):
-    def __init__(self, in_channels, n_layers, keep_prob, norm_type='sbn', gpu_id=None):
+    def __init__(self, in_channels, n_layers, keep_prob, norm_type='sbn', sum_till=14, gpu_id=None):
         super().__init__()
         self.loss_net_inp = LossNet(in_channels=in_channels, 
                                 n_layers=n_layers, 
@@ -165,7 +167,8 @@ class JNDModel(nn.Module):
         self.feature_loss = FeatureLossBatch(n_layers=n_layers,
                                              base_channels=32,
                                              gpu_id=gpu_id,
-                                             weights=True)
+                                             weights=True,
+                                             sum_till=sum_till)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inp, ref):
