@@ -4,7 +4,7 @@ import argparse
 
 from dataset_torch import load_data
 from network_model_torch import JNDModel, JNDnet
-from sklern.metrics import classification_report
+from sklearn.metrics import classification_report
 
 class Inference:
     def __init__(self, jnd_model, gpu_id=None):

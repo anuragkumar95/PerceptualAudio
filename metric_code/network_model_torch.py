@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy 
 from helper import *
-from sklearn.metrics import classification_report
+
 
 
 class LossNet(nn.Module):
