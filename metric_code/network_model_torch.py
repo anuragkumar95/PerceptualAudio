@@ -19,7 +19,7 @@ class LearnableSigmoid(nn.Module):
         return self.beta * torch.sigmoid(self.slope * x)
 
 class Discriminator(nn.Module):
-    def __init__(self,n_layers, ndf, in_channel=2):
+    def __init__(self,ndf, in_channel=2):
         super().__init__()
 
         self.layers = nn.Sequential(
@@ -201,7 +201,7 @@ class FeatureLossBatch(nn.Module):
 
 
 class JNDModel(nn.Module):
-    def __init__(self, in_channels, n_layers, keep_prob, norm_type='sbn', sum_till=14, gpu_id=None):
+    def __init__(self, in_channels, n_layers=14, keep_prob=0.7, norm_type='sbn', sum_till=14, gpu_id=None):
         super().__init__()
         #self.loss_net_inp = LossNet(in_channels=in_channels, 
         #                        n_layers=n_layers, 

@@ -273,7 +273,7 @@ def main(rank, world_size, args):
     trainer = JNDTrainer(args=args, 
                          train_dataloader=train_ds, 
                          val_dataloader=val_ds,
-                         in_channels=1, 
+                         in_channels=2, 
                          n_layers=args.layers, 
                          keep_prob=keep_prob_drop, 
                          norm_type=args.loss_norm,
