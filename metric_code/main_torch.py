@@ -121,9 +121,10 @@ class JNDTrainer:
 
     def forward_one_step(self, batch):
         wav_in, wav_out, labels = batch
+        b, len = wav_in.shape
         if self.gpu_id is not None:
-            wav_in = wav_in.to(self.gpu_id)
-            wav_out = wav_out.to(self.gpu_id)
+            wav_in = wav_in.reshape(b, 1, len, 1).to(self.gpu_id)
+            wav_out = wav_out.reshape(b, 1, len, 1).to(self.gpu_id)
             labels = labels.to(self.gpu_id)
         
         labels = labels.long().reshape(-1)
