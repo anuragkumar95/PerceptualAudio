@@ -137,7 +137,8 @@ class JNDTrainer:
         )
         #noisy_spec = power_compress(noisy_spec).permute(0, 1, 3, 2)
         #clean_spec = power_compress(clean_spec)
-
+        noisy_spec = noisy_spec.permute(0, 1, 3, 2)
+        clean_spec = clean_spec.permute(0, 1, 3, 2)
         return noisy_spec, clean_spec           
                         
     def load_model(self, path):
