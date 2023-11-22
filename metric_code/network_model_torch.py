@@ -103,7 +103,7 @@ class ClassificationHead(nn.Module):
         self.dense4 = nn.Linear(16, 6)
         self.dense2 = nn.Linear(6, out_dim)
         self.relu = nn.LeakyReLU(0.2)
-        self.sigmoid = nn.Sigmoid(dim = -1)
+        self.sigmoid = nn.Sigmoid()
         self.softmax = nn.Softmax(dim = -1)
         self.outputs = out_dim
 
