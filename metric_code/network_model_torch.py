@@ -14,6 +14,7 @@ class LossNet(nn.Module):
     def __init__(self, in_channels, n_layers, kernel_size, keep_prob, norm_type='sbn'):
         super().__init__()
         self.net = nn.ModuleList()
+        self.n_layers = n_layers
         for i in range(n_layers):
             out_channels = 32 * (2 ** (i // 5))
             prev_out = 32 * (2 ** ((i-1) // 5))
@@ -91,7 +92,7 @@ class LossNet(nn.Module):
         
     def forward(self, x):
         outs = []
-        for layer in self.net:
+        for i, layer in enumerate(self.net):
             x = layer(x)
             outs.append(x)
         return outs
@@ -119,10 +120,11 @@ class ClassificationHead(nn.Module):
 
                 
 class FeatureLossBatch(nn.Module):
-    def __init__(self, n_layers, base_channels, weights=False, gpu_id=None):
+    def __init__(self, n_layers, base_channels, sum_till=14, weights=False, gpu_id=None):
         super().__init__()
         self.out_channels = [base_channels * (2 ** (i // 5)) for i in range(n_layers)]
- 
+        self.sum_last_layers=sum_till
+        self.n_layers = n_layers
         if weights:
             self.weights = [nn.Parameter(torch.randn(features), requires_grad=True) for features in self.out_channels]
             if gpu_id is not None:
@@ -137,14 +139,15 @@ class FeatureLossBatch(nn.Module):
         """
         loss_final = 0
         for i, (e1, e2) in enumerate(zip(embeds1, embeds2)):
-            dist = e1 - e2
-            dist = dist.permute(0, 3, 2, 1)
-            if self.weights is not None:
-                res = (self.weights[i] * dist).permute(0, 3, 1, 2)
-            else:
-                res = dist.permute(0, 3, 1, 2)
-            loss = l1_loss_batch_torch(res)
-            loss_final += loss
+            if i >= self.n_layers - self.sum_last_layers:
+                dist = e1 - e2
+                dist = dist.permute(0, 3, 2, 1)
+                if self.weights is not None:
+                    res = (self.weights[i] * dist).permute(0, 3, 1, 2)
+                else:
+                    res = dist.permute(0, 3, 1, 2)
+                loss = l1_loss_batch_torch(res)
+                loss_final += loss
         return loss_final
 
 
@@ -157,7 +160,7 @@ class JNDModel(nn.Module):
                                 keep_prob=keep_prob, 
                                 norm_type=norm_type)
         
-        self.classification_layer = ClassificationHead(in_dim=1, out_dim=1)
+        self.classification_layer = ClassificationHead(in_dim=1, out_dim=2)
 
         self.feature_loss = FeatureLossBatch(n_layers=n_layers,
                                              base_channels=32,
