@@ -223,12 +223,12 @@ class JNDModel(nn.Module):
     def forward(self, inp, ref):
         #ref = self.loss_net(ref)
         #inp = self.loss_net(inp)
-        print(f"inp:{inp.shape}, ref:{ref.shape}")
-        dist = self.loss_net(inp, ref)
+        #print(f"inp:{inp.shape}, ref:{ref.shape}")
+        logits = self.loss_net(inp, ref)
         #dist = self.feature_loss(ref, inp)
         #dist = self.sigmoid(dist).reshape(-1, 1)
-        print(f"DIST:{dist.shape}")
-        logits = self.classification_layer(dist)
+        #print(f"DIST:{dist.shape}")
+        #logits = self.classification_layer(dist)
         
         return logits
     

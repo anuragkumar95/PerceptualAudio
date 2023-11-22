@@ -81,8 +81,8 @@ class JNDTrainer:
                             dev=gpu_id,
                             minit=0)
         """
-        self.criterion = nn.CrossEntropyLoss(reduction='mean')
-        #self.criterion = nn.BCEWithLogitsLoss(reduction='mean')
+        #self.criterion = nn.CrossEntropyLoss(reduction='mean')
+        self.criterion = nn.BCELoss(reduction='mean')
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=args.learning_rate)
 
         if gpu_id is not None:
@@ -165,7 +165,7 @@ class JNDTrainer:
 
     def forward_one_step(self, batch):
         wav_in, wav_out, labels = batch
-        b, len = wav_in.shape
+        #b, len = wav_in.shape
         if self.gpu_id is not None:
             wav_in = wav_in.to(self.gpu_id)
             wav_out = wav_out.to(self.gpu_id)
