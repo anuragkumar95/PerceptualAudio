@@ -23,8 +23,9 @@ class Inference:
                 wav_in = wav_in.to(self.gpu_id)
                 wav_out = wav_out.to(self.gpu_id)
                 labels = labels.to(self.gpu_id)
-            
             if self.type==0:
+                wav_in = wav_in.unsqueeze(1).unsqueeze(-1)
+                wav_out = wav_out.unsqueeze(1).unsqueeze(-1)
                 logits = self.model(wav_in, wav_out)
                 if logits.shape[-1] == 1:
                     preds = (logits >= 0.5).int()
