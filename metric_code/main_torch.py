@@ -173,8 +173,8 @@ class JNDTrainer:
 
         wav_in, wav_out = self.create_spectrograms(wav_in, wav_out)
         
-        labels = labels.long().reshape(-1, 1)
-        probs = self.model(inp=wav_in, ref=wav_out)
+        labels = labels.float().reshape(-1)
+        probs = self.model(inp=wav_in, ref=wav_out).reshape(-1)
         loss = self.criterion(probs, labels) 
         #_, _, class_prob = self.model(xper=wav_in, xref=wav_out)
         #loss = self.criterion(class_prob, labels)
