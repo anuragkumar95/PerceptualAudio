@@ -125,12 +125,12 @@ class JNDTrainer:
             wav_in = wav_in.to(self.gpu_id)
             wav_out = wav_out.to(self.gpu_id)
             labels = labels.to(self.gpu_id)
-
-        #probs = self.model(inp=wav_in, ref=wav_out).reshape(-1)
-        #loss = self.criterion(probs, labels) 
+        
         labels = labels.long().reshape(-1)
-        _, _, class_prob = self.model(xper=wav_in, xref=wav_out)
-        loss = self.criterion(class_prob, labels)
+        probs = self.model(inp=wav_in, ref=wav_out)
+        loss = self.criterion(probs, labels) 
+        #_, _, class_prob = self.model(xper=wav_in, xref=wav_out)
+        #loss = self.criterion(class_prob, labels)
         return loss 
 
     
