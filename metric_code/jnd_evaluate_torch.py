@@ -86,7 +86,7 @@ def main(ARGS):
                        dev=gpu_id,
                        minit=0)
     
-    model = load_model(ARGS.pt, model.to(gpu_id))
+    model = load_model(ARGS.pt, model.to(gpu_id)).eval()
     print(f"Model loaded from {ARGS.pt}")
     print(f"Running inference...")
     INFERENCE = Inference(model, gpu_id, ARGS.type)
