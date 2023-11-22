@@ -205,7 +205,7 @@ class JNDModel(nn.Module):
         super().__init__()
         self.loss_net = LossNet(in_channels=in_channels, 
                                 n_layers=n_layers, 
-                                kernel_size=4, 
+                                kernel_size=3, 
                                 keep_prob=keep_prob, 
                                 norm_type=norm_type)
 
